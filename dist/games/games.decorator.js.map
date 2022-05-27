@@ -1,0 +1,1 @@
+{"version":3,"file":"games.decorator.js","sourceRoot":"","sources":["../../src/games/games.decorator.ts"],"names":[],"mappings":";;;AAIA,2CAAwE;AAE3D,QAAA,KAAK,GAAG,IAAA,6BAAoB,EACvC,CAAC,IAAa,EAAE,GAAqB,EAAE,EAAE;IACvC,MAAM,OAAO,GAAG,GAAG,CAAC,YAAY,EAAE,CAAC,UAAU,EAAE,CAAC;IAChD,OAAO,OAAO,CAAC,IAAI,CAAC;AACtB,CAAC,CACF,CAAC"}
