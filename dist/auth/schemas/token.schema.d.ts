@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 export declare type TokenDocument = Token & Document;
 export declare class Token {
     refresh_token: string;

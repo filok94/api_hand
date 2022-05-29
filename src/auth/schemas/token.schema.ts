@@ -1,8 +1,10 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose from "mongoose";
 
 export type TokenDocument = Token & Document;
-@Schema()
+@Schema({
+  versionKey: false,
+})
 export class Token {
   @Prop({
     required: true,
@@ -24,7 +26,7 @@ export class Token {
   })
   access_token: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true, ref: "users" })
   user?: mongoose.Schema.Types.ObjectId;
 }
 

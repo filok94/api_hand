@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 export declare class DtoGetQuestionsQuery {
     readonly game_id: mongoose.Schema.Types.ObjectId;
 }

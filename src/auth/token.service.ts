@@ -1,18 +1,18 @@
-import { User, UserDocument } from './schemas/user.schema';
-import { UserDto } from './dto/create-user.dto';
-import { Token, TokenDocument } from './schemas/token.schema';
-import { Injectable } from '@nestjs/common';
-import { InjectModel, Schema } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
-import mongoose from 'mongoose';
+import { User, UserDocument } from "./schemas/user.schema";
+import { UserDto } from "./dto/create-user.dto";
+import { Token, TokenDocument } from "./schemas/token.schema";
+import { Injectable } from "@nestjs/common";
+import { InjectModel, Schema } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { JwtService } from "@nestjs/jwt";
+import mongoose from "mongoose";
 
 @Injectable()
 export class TokenService {
   constructor(
     @InjectModel(Token.name) private tokenModel: Model<TokenDocument>,
     private jwtService: JwtService,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>
   ) {}
 
   async getTokenByUser(id: string): Promise<Token> {
@@ -21,6 +21,17 @@ export class TokenService {
       return token;
     } catch (e) {
       throw new Error(e.message);
+    }
+  }
+
+  async getUserByToken(token: string): Promise<mongoose.Schema.Types.ObjectId> {
+    try {
+      const tokens = await this.tokenModel.findOne({
+        access_token: token,
+      });
+      return tokens.user;
+    } catch (e) {
+      throw new Error(e);
     }
   }
 
@@ -33,7 +44,7 @@ export class TokenService {
       const refreshToken = () =>
         this.jwtService.sign(
           { userId },
-          { expiresIn: process.env.REFRESH_EXPIRATION },
+          { expiresIn: process.env.REFRESH_EXPIRATION }
         );
       const access_token = accessToken();
       const refresh_token = refreshToken();
@@ -64,13 +75,13 @@ export class TokenService {
       const decodedToken = this.jwtService.decode(String(token));
 
       const refTokenExpiration =
-        new Date(decodedToken['exp'] * 1000) >= new Date(Date.now());
+        new Date(decodedToken["exp"] * 1000) >= new Date(Date.now());
 
       if (user && refTokenExpiration && userTokens) {
         const newTokens = await this.createToken(user);
         return newTokens;
       } else {
-        throw new Error('user is null');
+        throw new Error("user is null");
       }
     } catch (e) {
       throw new Error(e);

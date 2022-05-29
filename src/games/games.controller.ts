@@ -1,10 +1,11 @@
-import { IReturnedCalculatedData } from './games.interface.d';
-import { IReturnedOneQuestion } from './games.interface';
-import { DtoCalculate } from './dto/is_right.dto';
-import { ErrorMessages, ExcepitonsStrings } from '../exceptions/exceptions';
-import { PersonService } from './person.service';
-import { DtoCreateGame } from './dto/create_game.dto';
-import { GamesService } from './games.service';
+import mongoose from "mongoose";
+import { IReturnedCalculatedData } from "./games.interface.d";
+import { IReturnedOneQuestion } from "./games.interface";
+import { DtoCalculate } from "./dto/is_right.dto";
+import { ErrorMessages, ExcepitonsStrings } from "../exceptions/exceptions";
+import { PersonService } from "./person.service";
+import { DtoCreateGame } from "./dto/create_game.dto";
+import { GamesService } from "./games.service";
 import {
   Body,
   Controller,
@@ -17,20 +18,23 @@ import {
   UseGuards,
   BadRequestException,
   InternalServerErrorException,
-  HttpCode,
-} from '@nestjs/common';
-import { DtoCreatePerson } from './dto/create_person.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { DtoGetQuestionsQuery, IQueryGetGame } from './dto/queries.dto';
+  Headers,
+  Put,
+} from "@nestjs/common";
+import { DtoCreatePerson } from "./dto/create_person.dto";
+import { AuthGuard } from "@nestjs/passport";
+import { DtoGetQuestionsQuery, IQueryGetGame } from "./dto/queries.dto";
+import { IHeader } from "src/common/common_interfaces";
 
 @UseGuards(AuthGuard())
-@Controller('games')
+@Controller("games")
 export class GamesController {
   constructor(
     private gamesService: GamesService,
-    private personService: PersonService,
+    private personService: PersonService
   ) {}
-  @Get('get_all')
+
+  @Get("get_all")
   async getAllGames() {
     try {
       return await this.gamesService.getAllGames();
@@ -40,17 +44,17 @@ export class GamesController {
     }
   }
 
-  @Post('create')
+  @Post("create")
   async createGame(@Body() dto: DtoCreateGame) {
     try {
       return await this.gamesService.createGame(dto);
     } catch (e) {
       console.log(e.message);
-      if (String(e.message).includes('E11000')) {
+      if (String(e.message).includes("E11000")) {
         // throw new BadRequestException({}).getResponse();
         throw new HttpException(
           `one of persons ${ErrorMessages.DUPLICATES}`,
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.BAD_REQUEST
         );
       } else {
         throw new InternalServerErrorException().getResponse();
@@ -58,7 +62,7 @@ export class GamesController {
     }
   }
 
-  @Delete('delete_all')
+  @Delete("delete_all")
   async deleteAllGames() {
     try {
       const deletedCount = await this.gamesService.deleteAllGames();
@@ -69,7 +73,7 @@ export class GamesController {
     }
   }
 
-  @Delete('person/delete_all')
+  @Delete("person/delete_all")
   async deleteAllPersons() {
     try {
       const deletedCount = await this.personService.deleteAllPersons();
@@ -80,7 +84,7 @@ export class GamesController {
     }
   }
 
-  @Post('person/create')
+  @Post("person/create")
   async createNewPerson(@Body() dto: DtoCreatePerson) {
     try {
       const personId = await this.personService.createOnePerson(dto);
@@ -91,7 +95,7 @@ export class GamesController {
     }
   }
 
-  @Get('person/get_all')
+  @Get("person/get_all")
   async getAllPersons() {
     try {
       return await this.personService.getAllPersons();
@@ -101,7 +105,7 @@ export class GamesController {
     }
   }
 
-  @Get('get')
+  @Get("get")
   async getGameById(@Query() query: IQueryGetGame) {
     try {
       return await this.gamesService.getGameById(query.id);
@@ -109,7 +113,7 @@ export class GamesController {
       if (String(e.message).includes(ErrorMessages.NOT_FOUND)) {
         throw new HttpException(
           ErrorMessages.NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.BAD_REQUEST
         );
       } else {
         throw new InternalServerErrorException().getResponse();
@@ -117,9 +121,9 @@ export class GamesController {
     }
   }
 
-  @Get('get_questions')
+  @Get("get_questions")
   async getQuestionWithAnswers(
-    @Query() params: DtoGetQuestionsQuery,
+    @Query() params: DtoGetQuestionsQuery
   ): Promise<IReturnedOneQuestion[]> {
     try {
       return await this.gamesService.getQuestionsForGame(params);
@@ -132,28 +136,52 @@ export class GamesController {
       ) {
         throw new HttpException(
           ErrorMessages.NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.BAD_REQUEST
         );
       }
       throw new InternalServerErrorException().getResponse();
     }
   }
 
-  @Post('calculate')
-  @HttpCode(200)
+  @Put("calculate")
   async isAnswerRight(
     @Body() body: DtoCalculate,
+    @Headers() headers: IHeader
   ): Promise<IReturnedCalculatedData> {
     try {
-      return await this.gamesService.getResultData(body);
+      return await this.gamesService.getResultData(body, headers.token);
     } catch (e) {
       const errorMessage = String(e.message);
       console.log(errorMessage);
       if (errorMessage.includes(ExcepitonsStrings.CAST_ERROR)) {
         throw new HttpException(
           ErrorMessages.NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.BAD_REQUEST
         );
+      }
+      throw new InternalServerErrorException().getResponse();
+    }
+  }
+
+  @Get("get_results")
+  async getGameResultsByGameId(
+    @Query() query: DtoGetQuestionsQuery,
+    @Headers() headers: IHeader
+  ) {
+    try {
+      return await this.gamesService.getUserResults({
+        game: query.game_id,
+        user: headers.token,
+      });
+    } catch (e) {
+      const errorMessage = String(e.message);
+      console.log(errorMessage);
+
+      if (
+        errorMessage.includes(ExcepitonsStrings.CANNOT_READ_NULL) ||
+        errorMessage.includes(ExcepitonsStrings.CAST_ERROR)
+      ) {
+        throw new BadRequestException().getResponse();
       }
       throw new InternalServerErrorException().getResponse();
     }

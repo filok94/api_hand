@@ -1,10 +1,12 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
-import { Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose from "mongoose";
+import { Document } from "mongoose";
 
 export type AvatarDocument = Avatar & Document;
 
-@Schema()
+@Schema({
+  versionKey: false,
+})
 export class Avatar {
   @Prop({
     type: String,
@@ -25,14 +27,16 @@ export class Avatar {
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],
     required: true,
-    ref: 'avatar_props',
+    ref: "avatarprops",
   })
   props: mongoose.Schema.Types.ObjectId[];
 }
 export const AvatarSchema = SchemaFactory.createForClass(Avatar);
 
 export type AvatarPropsDocument = AvatarProps & Document;
-@Schema()
+@Schema({
+  versionKey: false,
+})
 export class AvatarProps {
   @Prop({
     type: String,
