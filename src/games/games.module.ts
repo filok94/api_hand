@@ -12,6 +12,7 @@ import { GamesController } from "./games.controller";
 import { Module } from "@nestjs/common";
 import { UserGames, UserGamesSchema } from "./schemas/user_games.schema";
 import { Person, PersonSchema } from "./schemas/person.schema";
+import { GamesAdminController } from "./games.admin.controller";
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { Person, PersonSchema } from "./schemas/person.schema";
     ]),
     AuthModule,
   ],
-  controllers: [GamesController],
+  controllers: [GamesController, GamesAdminController],
   providers: [GamesService, PersonService],
 })
 export class GamesModule {}

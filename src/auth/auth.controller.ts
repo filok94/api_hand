@@ -1,7 +1,7 @@
-import { TokenService } from './token.service';
-import { ErrorMessages } from '../exceptions/exceptions';
-import { UserDto } from './dto/create-user.dto';
-import loginDto from './dto/login-dto';
+import { TokenService } from "./token.service";
+import { ErrorMessages } from "../exceptions/exceptions";
+import { UserDto } from "./dto/create-user.dto";
+import loginDto from "./dto/login-dto";
 import {
   BadRequestException,
   Body,
@@ -14,24 +14,24 @@ import {
   InternalServerErrorException,
   Post,
   UnauthorizedException,
-} from '@nestjs/common';
-import { AuthService } from './auth.service';
-import RefreshTokenDto from './dto/refresh-token.dto';
-import mongoose from 'mongoose';
+} from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import RefreshTokenDto from "./dto/refresh-token.dto";
+import mongoose from "mongoose";
 
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private tokenService: TokenService,
+    private tokenService: TokenService
   ) {}
 
-  @Post('/sign_up')
+  @Post("/sign_up")
   async registrationUser(@Body() dto: UserDto) {
     try {
       const answer = await this.authService.signUp(dto);
 
-      if (typeof answer == 'number') {
+      if (typeof answer == "number") {
         throw new Error(ErrorMessages.ALREADY_IN_USE);
       } else {
         const access_token = answer.access_token;
@@ -47,7 +47,7 @@ export class AuthController {
     }
   }
 
-  @Post('/sign_in')
+  @Post("/sign_in")
   @HttpCode(200)
   async login(@Body() dto: loginDto) {
     try {
@@ -57,8 +57,8 @@ export class AuthController {
     } catch (e) {
       console.log(e.message);
       if (
-        e.message.includes('Cannot read properties') ||
-        e.message.includes('wrong password')
+        e.message.includes("Cannot read properties") ||
+        e.message.includes("wrong password")
       ) {
         throw new UnauthorizedException().getResponse();
       } else {
@@ -67,7 +67,7 @@ export class AuthController {
     }
   }
 
-  @Post('/refresh_tokens')
+  @Post("/refresh_tokens")
   async refreshTokens(@Body() dto: RefreshTokenDto) {
     try {
       const { access_token, refresh_token } =
@@ -76,12 +76,12 @@ export class AuthController {
     } catch (e) {
       console.log(e.message);
       if (
-        e.message.includes('user is null') ||
-        e.message.includes('Cannot read properties of')
+        e.message.includes("user is null") ||
+        e.message.includes("Cannot read properties of")
       ) {
         throw new HttpException(
           ErrorMessages.NOT_FOUND,
-          HttpStatus.NOT_FOUND,
+          HttpStatus.NOT_FOUND
         ).getResponse();
       } else {
         throw new InternalServerErrorException().getResponse();

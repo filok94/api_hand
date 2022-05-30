@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Type } from "class-transformer";
 import {
   ArrayMinSize,
   IsArray,
@@ -7,8 +7,8 @@ import {
   IsString,
   Max,
   ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
+} from "class-validator";
+import mongoose from "mongoose";
 
 export class DtoCalculate {
   @IsNotEmpty()

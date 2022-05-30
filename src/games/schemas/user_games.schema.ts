@@ -44,7 +44,7 @@ export class UserGames extends Document {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
   })
-  user: mongoose.Schema.Types.ObjectId;
+  user?: mongoose.Schema.Types.ObjectId;
 
   @Prop({
     type: Number,

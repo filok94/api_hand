@@ -1,14 +1,14 @@
-import { AvatarService } from './avatar.service';
-import { AvatarController } from './avatar.controller';
+import { AvatarService } from "./avatar.service";
+import { AvatarController } from "./avatar.controller";
 import {
   Avatar,
   AvatarSchema,
   AvatarProps,
   AvatarPropsSchema,
-} from './schemas/avatar.schema';
-import { MongooseModule } from '@nestjs/mongoose';
+} from "./schemas/avatar.schema";
+import { MongooseModule } from "@nestjs/mongoose";
 
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
 @Module({
   imports: [

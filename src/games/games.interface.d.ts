@@ -1,3 +1,4 @@
+import { PersonDocument } from "./schemas/person.schema";
 import mongoose from "mongoose";
 import { Person } from "./schemas/game.schema";
 export interface IReturnedOneQuestion {
@@ -29,4 +30,11 @@ export interface ILinkResultToDB {
 export interface IGetUserGameResult {
   game: mongoose.Schema.Types.ObjectId;
   user: string;
+}
+
+export interface IReturnedGameResults {
+  game_id: mongoose.Schema.Types.ObjectId;
+  game_title: string;
+  test_data: UserGametestDataDocument;
+  person_id: mongoose.Schema.Types.ObjectId;
 }

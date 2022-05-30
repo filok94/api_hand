@@ -1,22 +1,22 @@
-import { IAllAvatars } from './avatar.interface';
-import { CreateAvatarDto } from './dto/create_avatar_dto';
+import { IAllAvatars } from "./avatar.interface";
+import { CreateAvatarDto } from "./dto/create_avatar_dto";
 import {
   Avatar,
   AvatarDocument,
   AvatarProps,
   AvatarPropsDocument,
-} from './schemas/avatar.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
-import mongoose from 'mongoose';
+} from "./schemas/avatar.schema";
+import { InjectModel } from "@nestjs/mongoose";
+import { Injectable } from "@nestjs/common";
+import { Model } from "mongoose";
+import mongoose from "mongoose";
 
 @Injectable()
 export class AvatarService {
   constructor(
     @InjectModel(Avatar.name) private avatarModel: Model<AvatarDocument>,
     @InjectModel(AvatarProps.name)
-    private avatarPropsModel: Model<AvatarPropsDocument>,
+    private avatarPropsModel: Model<AvatarPropsDocument>
   ) {}
 
   async getAllAvatars(): Promise<IAllAvatars> {
@@ -30,7 +30,7 @@ export class AvatarService {
   }
 
   async createAvatarInfo(
-    dto: CreateAvatarDto,
+    dto: CreateAvatarDto
   ): Promise<mongoose.Schema.Types.ObjectId> {
     try {
       const ids = [];

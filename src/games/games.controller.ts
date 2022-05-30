@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { IReturnedCalculatedData } from "./games.interface.d";
 import { IReturnedOneQuestion } from "./games.interface";
 import { DtoCalculate } from "./dto/is_right.dto";
@@ -187,8 +186,3 @@ export class GamesController {
     }
   }
 }
-
-// клиент запрашивает айдишки всех вопросов по игре (фильтр по айди игры)
-// затем делает запрос по конкретному индексу - получает вопрос и варианты ответов по индексу, не получая номер правильного ответа
-// затем делает запрос с выбранным вариантом и получает true/false
-// затем в бд записывается прохождение в user_games и клиент может запросить персону, до этого permission denied

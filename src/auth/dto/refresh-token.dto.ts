@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import mongoose from 'mongoose';
+import { IsNotEmpty, IsString } from "class-validator";
+import mongoose from "mongoose";
 
 export default class RefreshTokenDto {
   @IsNotEmpty()

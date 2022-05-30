@@ -5,6 +5,7 @@ import {
   ILinkResultToDB,
   IReturnedCalculatedData,
   IReturnedCalculatedResult,
+  IReturnedGameResults,
 } from "./games.interface.d";
 import { IReturnedOneQuestion } from "./games.interface";
 import { DtoCalculate } from "./dto/is_right.dto";
@@ -189,13 +190,22 @@ export class GamesService {
     }
   }
 
-  async getUserResults(data: IGetUserGameResult): Promise<UserGamesDocument> {
+  async getUserResults(
+    data: IGetUserGameResult
+  ): Promise<IReturnedGameResults> {
     try {
       const user = await this.tokenService.getUserByToken(data.user);
-      return await this.userGamesModel.findOne({
+      const gameData = await this.userGamesModel.findOne({
         game: data.game,
         user,
       });
+      const game = await this.gameModel.findById(data.game);
+      return {
+        game_title: game.title,
+        game_id: gameData._id,
+        person_id: gameData.person,
+        test_data: gameData.test_data,
+      };
     } catch (e) {
       throw new Error(e);
     }

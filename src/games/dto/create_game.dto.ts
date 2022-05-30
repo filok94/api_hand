@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsNotEmpty,
@@ -7,8 +7,8 @@ import {
   Max,
   Min,
   ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
+} from "class-validator";
+import mongoose from "mongoose";
 
 export class DtoCreateGame {
   @IsNotEmpty()
@@ -45,10 +45,10 @@ export class DtoQuestionBlock {
 
   @IsNumber()
   @Min(0, {
-    message: 'value should be 0-3',
+    message: "value should be 0-3",
   })
   @Max(3, {
-    message: 'value should be 0-3',
+    message: "value should be 0-3",
   })
   right_answer: number;
 
