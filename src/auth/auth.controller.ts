@@ -67,11 +67,12 @@ export class AuthController {
     }
   }
 
-  @Post("/refresh_tokens")
+  @Post("refresh_tokens")
   async refreshTokens(@Body() dto: RefreshTokenDto) {
     try {
       const { access_token, refresh_token } =
         await this.tokenService.refreshTokens(dto.refresh_token);
+
       return { access_token, refresh_token };
     } catch (e) {
       console.log(e.message);

@@ -8,7 +8,6 @@ export type TokenDocument = Token & Document;
 export class Token {
   @Prop({
     required: true,
-    immutable: true,
     unique: true,
     type: String,
     minlength: 150,
@@ -18,7 +17,6 @@ export class Token {
 
   @Prop({
     required: true,
-    immutable: true,
     unique: true,
     type: String,
     minlength: 150,

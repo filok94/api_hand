@@ -39,7 +39,7 @@ export class TokenService {
     try {
       const userId = await (
         await this.userModel.findOne({ email: payload.email })
-      )?.id;
+      ).id;
       const accessToken = () => this.jwtService.sign({ userId });
       const refreshToken = () =>
         this.jwtService.sign(
@@ -51,34 +51,42 @@ export class TokenService {
 
       const newTokens = { access_token, refresh_token };
       if (userId != null) {
-        const userTokens = await this.tokenModel.findOne({ user: userId });
-        if (userTokens) {
-          await this.tokenModel.findOneAndDelete({ user: userId });
-        }
-        const newInfo = await this.tokenModel.create({
-          user: userId,
-          ...newTokens,
-        });
-        return await newInfo.save();
+        const newInfo = await this.tokenModel.findOneAndUpdate(
+          { user: userId },
+          {
+            user: userId,
+            ...newTokens,
+          },
+          {
+            upsert: true,
+            new: true,
+          }
+        );
+        return newInfo;
       }
     } catch (e) {
       throw new Error(e.message);
     }
   }
 
-  async refreshTokens(token: mongoose.Schema.Types.ObjectId) {
+  async refreshTokens(token: string) {
     try {
-      const userTokens = await this.tokenModel.findOne({
+      const tokenDocument = await this.tokenModel.findOne({
         refresh_token: token,
       });
-      const user = await this.userModel.findById(userTokens.user);
-      const decodedToken = this.jwtService.decode(String(token));
 
-      const refTokenExpiration =
-        new Date(decodedToken["exp"] * 1000) >= new Date(Date.now());
+      const userDocument = await this.userModel.findById(tokenDocument.user);
+      const decodedRefreshToken = this.jwtService.decode(String(token));
 
-      if (user && refTokenExpiration && userTokens) {
-        const newTokens = await this.createToken(user);
+      const refreshTokenNotExpired =
+        new Date(decodedRefreshToken["exp"] * 1000) >= new Date(Date.now());
+
+      if (
+        userDocument != null &&
+        refreshTokenNotExpired &&
+        tokenDocument != null
+      ) {
+        const newTokens = await this.createToken(userDocument);
         return newTokens;
       } else {
         throw new Error("user is null");
