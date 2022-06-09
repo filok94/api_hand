@@ -6,15 +6,20 @@ import {
   IsNumber,
   IsString,
   Max,
+  Min,
   ValidateNested,
 } from "class-validator";
 import mongoose from "mongoose";
+import { IsIdExistsAndCorrect } from "./validators/validate_game_id";
+import { ValidateIndexes } from "./validators/validate_index";
 
 export class DtoCalculate {
   @IsNotEmpty()
   @IsString()
+  @IsIdExistsAndCorrect("game")
   readonly game_id: mongoose.Schema.Types.ObjectId;
 
+  @ValidateIndexes()
   @ValidateNested({ each: true })
   @Type(() => DtoCalculateAnswers)
   @IsArray()
@@ -26,10 +31,12 @@ export class DtoCalculate {
 export class DtoCalculateAnswers {
   @IsNotEmpty()
   @IsNumber()
+  @Min(0)
   readonly index: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Max(3)
+  @Min(0)
   readonly answer: number;
 }

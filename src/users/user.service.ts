@@ -1,13 +1,13 @@
-import { TokenService } from './../auth/token.service';
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from 'src/auth/schemas/user.schema';
-import { Model } from 'mongoose';
+import { TokenService } from "./../auth/token.service";
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { User, UserDocument } from "../auth/schemas/user.schema";
+import { Model } from "mongoose";
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private tokenService: TokenService,
+    private tokenService: TokenService
   ) {}
   async getAllUsers(): Promise<any> {
     try {

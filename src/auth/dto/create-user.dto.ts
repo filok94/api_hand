@@ -7,6 +7,4 @@ export class UserDto {
 
   @IsNotEmpty()
   password: string;
-
-  isAdmin?: boolean;
 }

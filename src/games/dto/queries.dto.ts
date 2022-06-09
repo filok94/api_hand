@@ -1,12 +1,15 @@
 import { IsNotEmpty } from "class-validator";
 import mongoose from "mongoose";
+import { IsIdExistsAndCorrect } from "./validators/validate_game_id";
 
-export class DtoGetQuestionsQuery {
+export class DtoGameIdQuery {
   @IsNotEmpty()
+  @IsIdExistsAndCorrect("game")
   readonly game_id: mongoose.Schema.Types.ObjectId;
 }
 
-export class IQueryGetGame {
+export class DtoPersonIdQuery {
   @IsNotEmpty()
-  id: mongoose.Schema.Types.ObjectId;
+  @IsIdExistsAndCorrect("person")
+  readonly id: mongoose.Schema.Types.ObjectId;
 }

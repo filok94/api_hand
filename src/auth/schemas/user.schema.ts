@@ -14,13 +14,6 @@ export class User {
 
   @Prop({ type: Boolean, required: true, default: false })
   isAdmin: boolean;
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    default: new mongoose.Types.ObjectId(),
-  })
-  _id?: mongoose.Schema.Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

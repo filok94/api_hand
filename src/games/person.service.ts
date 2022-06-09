@@ -11,12 +11,11 @@ export class PersonService {
     @InjectModel(Person.name) private personModel: Model<PersonDocument>
   ) {}
 
-  async createOnePerson(
-    dto: DtoCreatePerson
-  ): Promise<mongoose.Schema.Types.ObjectId> {
+  async getPersonById(
+    id: mongoose.Schema.Types.ObjectId
+  ): Promise<PersonDocument> {
     try {
-      const newPerson = await (await this.personModel.create(dto)).save();
-      return newPerson.id;
+      return await this.personModel.findById(id);
     } catch (e) {
       throw new Error(e);
     }
@@ -45,10 +44,21 @@ export class PersonService {
     }
   }
 
-  async deleteAllPersons(): Promise<number> {
+  async adminDeleteAllPersons(): Promise<number> {
     try {
       const count = (await this.personModel.deleteMany()).deletedCount;
       return count;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async adminCreateOnePerson(
+    dto: DtoCreatePerson
+  ): Promise<mongoose.Schema.Types.ObjectId> {
+    try {
+      const newPerson = await (await this.personModel.create(dto)).save();
+      return newPerson.id;
     } catch (e) {
       throw new Error(e);
     }

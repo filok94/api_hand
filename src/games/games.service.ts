@@ -8,9 +8,8 @@ import {
   IReturnedGameResults,
 } from "./games.interface.d";
 import { IReturnedOneQuestion } from "./games.interface";
-import { DtoCalculate } from "./dto/is_right.dto";
+import { DtoCalculate } from "./dto/calculate.dto";
 import { ErrorMessages } from "./../exceptions/exceptions";
-
 import { DtoCreateGame } from "./dto/create_game.dto";
 import {
   Game,
@@ -22,8 +21,8 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import mongoose from "mongoose";
-import { DtoGetQuestionsQuery } from "./dto/queries.dto";
-import { TokenService } from "src/auth/token.service";
+import { DtoGameIdQuery } from "./dto/queries.dto";
+import { TokenService } from "../auth/token.service";
 import { Person, PersonDocument } from "./schemas/person.schema";
 
 @Injectable()
@@ -46,9 +45,10 @@ export class GamesService {
     }
   }
 
-  async getGameById(
-    id: mongoose.Schema.Types.ObjectId
-  ): Promise<{ game: Game; question_block: TestData[] }> {
+  async adminGetGameById(id: mongoose.Schema.Types.ObjectId): Promise<{
+    game: GameDocument;
+    question_block: TestData[];
+  }> {
     try {
       const game = await this.gameModel.findById(id);
       const data = await this.testDataModel.find({ game: id });
@@ -58,13 +58,13 @@ export class GamesService {
     }
   }
 
-  async createGame(
+  async adminCreateGame(
     dto: DtoCreateGame
   ): Promise<mongoose.Schema.Types.ObjectId> {
     try {
       let foundCount = 0;
       for (const person of dto.persons) {
-        const isPersonExist = await this.personModel.find({ _id: person });
+        const isPersonExist = await this.personModel.findOne({ _id: person });
         isPersonExist ? foundCount++ : null;
       }
 
@@ -79,14 +79,14 @@ export class GamesService {
         const game_data = await this.gameModel.findById(newGame.id);
         return game_data._id;
       } else {
-        throw new Error();
+        throw new Error(ErrorMessages.PERSON_NOT_FOUND);
       }
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async deleteAllGames(): Promise<number> {
+  async adminDeleteAllGames(): Promise<number> {
     try {
       await this.testDataModel.deleteMany();
       return (await this.gameModel.deleteMany()).deletedCount;
@@ -96,7 +96,7 @@ export class GamesService {
   }
 
   async getQuestionsForGame(
-    param: DtoGetQuestionsQuery
+    param: DtoGameIdQuery
   ): Promise<IReturnedOneQuestion[]> {
     try {
       const gameData = await this.testDataModel.find({
@@ -120,22 +120,35 @@ export class GamesService {
     dto: DtoCalculate
   ): Promise<IReturnedCalculatedResult[]> {
     try {
-      const answersAndResults: IReturnedCalculatedResult[] = [];
-      for (const answer of dto.answers) {
-        const questionData = await this.testDataModel.findOne({
-          game: dto.game_id,
-          index: answer.index,
-        });
-        const isRight = questionData.right_answer == answer.answer;
-        answersAndResults.push({
-          right_answer: questionData.right_answer,
-          user_answer: answer.answer,
-          is_right: isRight,
-          index: answer.index,
-        });
+      const questionsInDb = await this.testDataModel.find({
+        game: dto.game_id,
+      });
+      if (questionsInDb.length === 0) {
+        throw new Error(ErrorMessages.CANNOT_FIND_GAME);
       }
+      const lengthCheck = questionsInDb.length == dto.answers.length;
+      if (lengthCheck) {
+        const answersAndResults: IReturnedCalculatedResult[] = [];
+        for (const answer of dto.answers) {
+          const questionData = await this.testDataModel.findOne({
+            game: dto.game_id,
+            index: answer.index,
+          });
+          const isRight = questionData.right_answer == answer.answer;
+          answersAndResults.push({
+            right_answer: questionData.right_answer,
+            user_answer: answer.answer,
+            is_right: isRight,
+            index: answer.index,
+          });
+        }
 
-      return answersAndResults;
+        return answersAndResults;
+      } else {
+        throw new Error(
+          `answers ${ErrorMessages.LENGTH_IS_BAD}. Should be ${questionsInDb.length}`
+        );
+      }
     } catch (e) {
       throw new Error(e);
     }
@@ -145,25 +158,29 @@ export class GamesService {
     dto: DtoCalculate,
     userToken: string
   ): Promise<IReturnedCalculatedData> {
-    const test_result = await this.calculateResult(dto);
-    const countOfRightAnswers = test_result.filter((e) => e.is_right).length;
-    const gamePersons = (await this.gameModel.findById(dto.game_id)).persons;
-    const person = await this.personService.calculatePerson(
-      countOfRightAnswers,
-      gamePersons
-    );
-    const user = await this.tokenService.getUserByToken(userToken);
-    await this.linkResultToUser({
-      right_answers_count: countOfRightAnswers,
-      person: person._id,
-      game: dto.game_id,
-      user: user,
-      test_data: test_result,
-    });
-    return {
-      person,
-      test_result,
-    };
+    try {
+      const test_result = await this.calculateResult(dto);
+      const countOfRightAnswers = test_result.filter((e) => e.is_right).length;
+      const gamePersons = (await this.gameModel.findById(dto.game_id)).persons;
+      const person = await this.personService.calculatePerson(
+        countOfRightAnswers,
+        gamePersons
+      );
+      const user = await this.tokenService.getUserByToken(userToken);
+      await this.linkResultToUser({
+        right_answers_count: countOfRightAnswers,
+        person: person._id,
+        game: dto.game_id,
+        user: user,
+        test_data: test_result,
+      });
+      return {
+        person,
+        test_result,
+      };
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
   private async linkResultToUser(

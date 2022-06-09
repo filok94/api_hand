@@ -1,3 +1,5 @@
+import { AdminPersonController } from "./person.admin.controller";
+import { PersonController } from "./person.controller";
 import { AuthModule } from "./../auth/auth.module";
 import { PersonService } from "./person.service";
 import {
@@ -13,6 +15,8 @@ import { Module } from "@nestjs/common";
 import { UserGames, UserGamesSchema } from "./schemas/user_games.schema";
 import { Person, PersonSchema } from "./schemas/person.schema";
 import { GamesAdminController } from "./games.admin.controller";
+import { IsIdExistsAndCorrectConstraint } from "./dto/validators/validate_game_id";
+import { ValidateIndexesConstraint } from "./dto/validators/validate_index";
 
 @Module({
   imports: [
@@ -24,7 +28,17 @@ import { GamesAdminController } from "./games.admin.controller";
     ]),
     AuthModule,
   ],
-  controllers: [GamesController, GamesAdminController],
-  providers: [GamesService, PersonService],
+  controllers: [
+    GamesController,
+    GamesAdminController,
+    PersonController,
+    AdminPersonController,
+  ],
+  providers: [
+    GamesService,
+    PersonService,
+    IsIdExistsAndCorrectConstraint,
+    ValidateIndexesConstraint,
+  ],
 })
 export class GamesModule {}
