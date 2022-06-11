@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { Document } from "mongoose";
 
 export type AvatarDocument = Avatar & Document;
+export type AvatarPropsDocument = AvatarProps & Document;
+export type UserAvatarDocument = UserAvatar & Document;
 
 @Schema({
   versionKey: false,
@@ -33,7 +35,6 @@ export class Avatar {
 }
 export const AvatarSchema = SchemaFactory.createForClass(Avatar);
 
-export type AvatarPropsDocument = AvatarProps & Document;
 @Schema({
   versionKey: false,
 })
@@ -49,5 +50,35 @@ export class AvatarProps {
     required: true,
   })
   values: string[];
+
+  @Prop({
+    type: Boolean,
+    required: true,
+  })
+  with_probability: boolean;
 }
 export const AvatarPropsSchema = SchemaFactory.createForClass(AvatarProps);
+
+@Schema({ versionKey: false })
+export class UserAvatar {
+  @Prop({
+    type: String,
+    required: true,
+  })
+  full_link: string;
+
+  @Prop({
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+  })
+  user: mongoose.Schema.Types.ObjectId;
+
+  @Prop({
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "avatars",
+  })
+  avatar: mongoose.Schema.Types.ObjectId;
+}
+export const UserAvatarSchema = SchemaFactory.createForClass(UserAvatar);

@@ -26,16 +26,6 @@ export class UserService {
     }
   }
 
-  async deleteAllUsers(): Promise<boolean> {
-    try {
-      await this.tokenService.deleteAllTokens();
-      await this.userModel.deleteMany().exec();
-      return true;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
   async getAllTokens() {
     try {
       return await this.tokenService.getAllTokens();

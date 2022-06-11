@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from "class-validator";
 import mongoose from "mongoose";
-import { IsIdExistsAndCorrect } from "./validators/validate_game_id";
+import { IsIdExistsAndCorrect } from "../../validators/id_validator";
 import { ValidateIndexes } from "./validators/validate_index";
 
 export class DtoCalculate {

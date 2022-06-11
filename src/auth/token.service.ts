@@ -104,13 +104,4 @@ export class TokenService {
       throw new Error(e);
     }
   }
-
-  async deleteAllTokens() {
-    try {
-      const tokens = await this.tokenModel.deleteMany().exec();
-      return tokens;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
 }

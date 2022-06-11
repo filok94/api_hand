@@ -86,15 +86,6 @@ export class GamesService {
     }
   }
 
-  async adminDeleteAllGames(): Promise<number> {
-    try {
-      await this.testDataModel.deleteMany();
-      return (await this.gameModel.deleteMany()).deletedCount;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
   async getQuestionsForGame(
     param: DtoGameIdQuery
   ): Promise<IReturnedOneQuestion[]> {
@@ -102,7 +93,7 @@ export class GamesService {
       const gameData = await this.testDataModel.find({
         game: param.game_id,
       });
-      const returnedArray: IReturnedOneQuestion[] | never[] = [];
+      const returnedArray: IReturnedOneQuestion[] = [];
       for (const game of gameData) {
         returnedArray.push({
           question: game.question,

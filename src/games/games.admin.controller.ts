@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -33,24 +32,9 @@ export class GamesAdminController {
           `one of persons ${ErrorMessages.DUPLICATES}`,
           HttpStatus.BAD_REQUEST
         );
-      } else if (errorMessage.includes(ErrorMessages.PERSON_NOT_FOUND)) {
-        throw new HttpException(
-          ErrorMessages.PERSON_NOT_FOUND,
-          HttpStatus.BAD_REQUEST
-        );
       } else {
         throw new InternalServerErrorException().getResponse();
       }
-    }
-  }
-  @Delete("delete_all")
-  async deleteAllGames() {
-    try {
-      const deletedCount = await this.gamesService.adminDeleteAllGames();
-      return { deleted: deletedCount };
-    } catch (e) {
-      console.log(e.message);
-      throw new InternalServerErrorException().getResponse();
     }
   }
 

@@ -1,3 +1,4 @@
+import { IsIdExistsAndCorrectConstraint } from "./../validators/id_validator";
 import { AvatarModule } from "../avatars/avatar.module";
 import { UserModule } from "./../users/user.module";
 import { AuthModule } from "../auth/auth.module";
@@ -8,7 +9,7 @@ import "dotenv/config";
 
 @Module({
   controllers: [],
-  providers: [],
+  providers: [IsIdExistsAndCorrectConstraint],
   imports: [
     MongooseModule.forRoot(process.env.DB_URL),
     GamesModule,
