@@ -1,6 +1,9 @@
-import { PersonService } from "./../../person.service";
+import { AvatarService } from "./../avatars/avatar.service";
+import { PersonService } from "./../games/person.service";
+import { GamesService } from "./../games/games.service";
+
 import mongoose from "mongoose";
-import { GamesService } from "./../../games.service";
+
 import {
   registerDecorator,
   ValidationArguments,
@@ -9,7 +12,7 @@ import {
   ValidatorConstraintInterface,
 } from "class-validator";
 import { Injectable } from "@nestjs/common";
-type GameAndPerson = "game" | "person";
+type ServiceType = "game" | "person" | "avatar";
 @ValidatorConstraint({ async: true })
 @Injectable()
 export class IsIdExistsAndCorrectConstraint
@@ -17,21 +20,23 @@ export class IsIdExistsAndCorrectConstraint
 {
   constructor(
     private gameService: GamesService,
-    private personService: PersonService
+    private personService: PersonService,
+    private avatarService: AvatarService
   ) {}
   returnMessage = "";
   async validate(
     id: mongoose.Schema.Types.ObjectId,
     args: ValidationArguments
   ) {
+    const [idType] = args.constraints as ServiceType[];
     //проверка корректности айди
     if (!mongoose.Types.ObjectId.isValid(String(id))) {
-      this.returnMessage = "id is incorrect";
+      this.returnMessage = `${idType} id is incorrect`;
       return false;
     }
 
-    //проверка существует ли такой айди в базе (персон или игр)
-    const [idType] = args.constraints as GameAndPerson[];
+    //проверка существует ли такой айди в базе
+
     switch (idType) {
       case "game":
         const idGame = await this.gameService.adminGetGameById(id);
@@ -47,6 +52,12 @@ export class IsIdExistsAndCorrectConstraint
           return false;
         }
         break;
+      case "avatar":
+        const isExist = await this.avatarService.isAvatarExists(id);
+        if (!isExist) {
+          this.returnMessage = "cannot find avatar with this id";
+          return false;
+        }
       default:
         return true;
     }
@@ -60,7 +71,7 @@ export class IsIdExistsAndCorrectConstraint
 }
 
 export function IsIdExistsAndCorrect(
-  property: GameAndPerson,
+  property: ServiceType,
   validationOptions?: ValidationOptions
 ) {
   return function (object: Object, propertyName: string) {

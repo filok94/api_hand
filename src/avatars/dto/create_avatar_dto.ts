@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsString,
   ValidateNested,
@@ -33,4 +34,8 @@ export class AvatarProp {
   @IsArray()
   @IsString({ each: true })
   readonly values: string[];
+
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly with_probability: boolean;
 }

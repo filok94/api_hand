@@ -44,15 +44,6 @@ export class PersonService {
     }
   }
 
-  async adminDeleteAllPersons(): Promise<number> {
-    try {
-      const count = (await this.personModel.deleteMany()).deletedCount;
-      return count;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
   async adminCreateOnePerson(
     dto: DtoCreatePerson
   ): Promise<mongoose.Schema.Types.ObjectId> {

@@ -3,11 +3,9 @@ import { ErrorMessages } from "../exceptions/exceptions";
 import { UserDto } from "./dto/create-user.dto";
 import loginDto from "./dto/login-dto";
 import {
-  BadRequestException,
   Body,
   ConflictException,
   Controller,
-  Get,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -17,7 +15,6 @@ import {
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import RefreshTokenDto from "./dto/refresh-token.dto";
-import mongoose from "mongoose";
 
 @Controller("auth")
 export class AuthController {
@@ -68,6 +65,7 @@ export class AuthController {
   }
 
   @Post("refresh_tokens")
+  @HttpCode(200)
   async refreshTokens(@Body() dto: RefreshTokenDto) {
     try {
       const { access_token, refresh_token } =

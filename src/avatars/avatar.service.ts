@@ -1,10 +1,18 @@
-import { IAllAvatars } from "./avatar.interface";
+import { DtoSaveAvatar } from "./dto/save_avatar.dto";
+import { TokenService } from "./../auth/token.service";
+import {
+  IPropObject,
+  IReturnedOneAvatar,
+} from "./interfaces/avatar.interface.d";
+import { IAllAvatar } from "./interfaces/avatar.interface";
 import { CreateAvatarDto } from "./dto/create_avatar_dto";
 import {
   Avatar,
   AvatarDocument,
   AvatarProps,
   AvatarPropsDocument,
+  UserAvatar,
+  UserAvatarDocument,
 } from "./schemas/avatar.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { Injectable } from "@nestjs/common";
@@ -16,16 +24,98 @@ export class AvatarService {
   constructor(
     @InjectModel(Avatar.name) private avatarModel: Model<AvatarDocument>,
     @InjectModel(AvatarProps.name)
-    private avatarPropsModel: Model<AvatarPropsDocument>
+    private avatarPropsModel: Model<AvatarPropsDocument>,
+    @InjectModel(UserAvatar.name)
+    private userAvatarModel: Model<UserAvatarDocument>,
+    private tokenService: TokenService
   ) {}
 
-  async getAllAvatars(): Promise<IAllAvatars> {
+  async getAllAvatars(): Promise<IAllAvatar[]> {
     try {
-      const props = await this.avatarPropsModel.find();
-      const avatars = await this.avatarModel.find();
-      return { avatars, props };
+      const avatarsInDb = await this.avatarModel.find();
+      const returnedAvatars: IAllAvatar[] = avatarsInDb.map(
+        (e: AvatarDocument) => {
+          return {
+            ref_name: e.ref_name,
+            base_link: e.base_link,
+            id: e.id,
+          };
+        }
+      );
+      return returnedAvatars;
     } catch (e) {
       throw new Error(e);
+    }
+  }
+
+  async getAvatarById(
+    id: mongoose.Schema.Types.ObjectId
+  ): Promise<IReturnedOneAvatar> {
+    try {
+      const avatarProps: IPropObject[] = [];
+      const avatar = await this.avatarModel.findById(id);
+
+      for (const prop of avatar.props) {
+        const propById = await this.avatarPropsModel.findById(prop);
+        avatarProps.push({
+          prop_name: propById.prop_name,
+          prop_values: propById.values,
+          with_probability: propById.with_probability,
+        });
+      }
+      return {
+        ref_name: avatar.ref_name,
+        base_link: avatar.base_link,
+        props: avatarProps,
+      };
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async saveAvatarForUser(
+    userToken: string,
+    avatarInfo: DtoSaveAvatar
+  ): Promise<boolean> {
+    try {
+      const userId = await this.tokenService.getUserByToken(userToken);
+      const newRecord = await this.userAvatarModel.updateOne(
+        {
+          user: userId,
+        },
+        {
+          user: userId,
+          full_link: avatarInfo.full_link,
+          avatar: avatarInfo.avatar,
+        },
+        { new: true, upsert: true, rawResult: true }
+      );
+
+      return newRecord.acknowledged;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async getUserAvatarLink(token: string): Promise<string> {
+    try {
+      const userId = await this.tokenService.getUserByToken(token);
+      const usersAvatar = await this.userAvatarModel.findOne({ user: userId });
+      if (!usersAvatar) {
+        return (await this.avatarModel.find())[0].base_link;
+      }
+      return usersAvatar.full_link;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async isAvatarExists(id: mongoose.Schema.Types.ObjectId): Promise<boolean> {
+    try {
+      const avatar = await (await this.avatarModel.findById(id)).id;
+      if (avatar != null) return true;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -38,6 +128,7 @@ export class AvatarService {
         const newProp = await this.avatarPropsModel.create({
           prop_name: prop.prop_name,
           values: prop.values,
+          with_probability: prop.with_probability,
         });
         ids.push(newProp._id);
       }
@@ -47,18 +138,6 @@ export class AvatarService {
         props: ids,
       });
       return avatarInfo._id;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async deleteAllAvatarinfo(): Promise<number> {
-    try {
-      const deletedProps = (await this.avatarPropsModel.deleteMany())
-        .deletedCount;
-      const deletedAvatarInfo = (await this.avatarModel.deleteMany())
-        .deletedCount;
-      return Math.max(deletedAvatarInfo, deletedProps);
     } catch (e) {
       throw new Error(e);
     }

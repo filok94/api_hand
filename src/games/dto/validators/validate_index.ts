@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { GamesService } from "./../../games.service";
+import { GamesService } from "../../games.service";
 import {
   registerDecorator,
   ValidationArguments,
@@ -14,7 +14,7 @@ import { DtoCalculateAnswers } from "../calculate.dto";
 @Injectable()
 export class ValidateIndexesConstraint implements ValidatorConstraintInterface {
   constructor(private gameService: GamesService) {}
-  #returnMessage = "";
+  #returnMessage = "cannot check answers for unknown id";
   #neededSize = 0;
   #givenSize = 0;
   async validate(dto: DtoCalculateAnswers[], args: ValidationArguments) {
@@ -58,10 +58,13 @@ export class ValidateIndexesConstraint implements ValidatorConstraintInterface {
       }
 
       // Проверка, что даны все индексы
-      this.#returnMessage = `Should be ${
-        this.#neededSize
-      } unique answers, given ${this.#givenSize}`;
-      return this.#neededSize === this.#givenSize;
+      if (this.#neededSize !== this.#givenSize) {
+        this.#returnMessage = `Should be ${
+          this.#neededSize
+        } unique answers, given ${this.#givenSize}`;
+      }
+      this.#returnMessage = "cannot find indexes for unknown id";
+      return true;
     } catch (e) {
       console.log(e);
     }

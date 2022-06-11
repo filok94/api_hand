@@ -3,7 +3,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   InternalServerErrorException,
   Post,
@@ -31,16 +30,6 @@ export class AdminPersonController {
       return { person_id: personId };
     } catch (e) {
       console.log(e.message);
-      throw new InternalServerErrorException().getResponse();
-    }
-  }
-
-  @Delete("delete_all")
-  async deleteAllPersons() {
-    try {
-      const deletedCount = await this.personService.adminDeleteAllPersons();
-      return { deleted: deletedCount };
-    } catch (e) {
       throw new InternalServerErrorException().getResponse();
     }
   }

@@ -1,6 +1,6 @@
 import { IsNotEmpty } from "class-validator";
 import mongoose from "mongoose";
-import { IsIdExistsAndCorrect } from "./validators/validate_game_id";
+import { IsIdExistsAndCorrect } from "../../validators/id_validator";
 
 export class DtoGameIdQuery {
   @IsNotEmpty()
