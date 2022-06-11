@@ -1,3 +1,5 @@
+import { Roles } from "./../roles_guard/roles.decorator";
+import { RolesGuard } from "./../roles_guard/roles_guard";
 import {
   Body,
   Controller,
@@ -15,11 +17,12 @@ import { DtoCreateGame } from "./dto/create_game.dto";
 import { DtoGameIdQuery } from "./dto/queries.dto";
 import { GamesService } from "./games.service";
 
-@UseGuards(AuthGuard())
+@UseGuards(AuthGuard(), RolesGuard)
 @Controller("admin/games")
 export class GamesAdminController {
   constructor(private gamesService: GamesService) {}
 
+  @Roles("admin")
   @Post("create")
   async createGame(@Body() dto: DtoCreateGame) {
     try {
@@ -37,7 +40,7 @@ export class GamesAdminController {
       }
     }
   }
-
+  @Roles("admin")
   @Get("get_game")
   async getGameById(@Query() query: DtoGameIdQuery) {
     try {

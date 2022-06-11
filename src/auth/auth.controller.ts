@@ -3,6 +3,7 @@ import { ErrorMessages } from "../exceptions/exceptions";
 import { UserDto } from "./dto/create-user.dto";
 import loginDto from "./dto/login-dto";
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -73,15 +74,18 @@ export class AuthController {
 
       return { access_token, refresh_token };
     } catch (e) {
+      const errorMessage = String(e.message);
       console.log(e.message);
       if (
-        e.message.includes("user is null") ||
-        e.message.includes("Cannot read properties of")
+        errorMessage.includes("user is null") ||
+        errorMessage.includes("Cannot read properties of")
       ) {
         throw new HttpException(
           ErrorMessages.NOT_FOUND,
           HttpStatus.NOT_FOUND
         ).getResponse();
+      } else if (errorMessage.includes(ErrorMessages.CANNOT_FIND_TOKEN)) {
+        throw new BadRequestException(errorMessage).getResponse();
       } else {
         throw new InternalServerErrorException().getResponse();
       }

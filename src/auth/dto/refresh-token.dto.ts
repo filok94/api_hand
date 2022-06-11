@@ -1,8 +1,7 @@
-import { IsNotEmpty, IsString } from "class-validator";
-import mongoose from "mongoose";
+import { IsJWT, IsNotEmpty } from "class-validator";
 
 export default class RefreshTokenDto {
   @IsNotEmpty()
-  @IsString()
+  @IsJWT()
   refresh_token: string;
 }

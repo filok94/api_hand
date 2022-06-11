@@ -1,4 +1,4 @@
-import { ValidateLinkConstraint } from "./validators/validate_link";
+import { UserModule } from "./../users/user.module";
 import { AuthModule } from "./../auth/auth.module";
 import { AvatarService } from "./avatar.service";
 import { AvatarController } from "./avatar.controller";
@@ -22,9 +22,10 @@ import { Module } from "@nestjs/common";
       { name: UserAvatar.name, schema: UserAvatarSchema },
     ]),
     AuthModule,
+    UserModule,
   ],
   controllers: [AvatarController],
-  providers: [AvatarService, ValidateLinkConstraint],
+  providers: [AvatarService],
   exports: [AvatarService],
 })
 export class AvatarModule {}

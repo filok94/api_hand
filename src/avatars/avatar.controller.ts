@@ -1,3 +1,7 @@
+import { AuthGuard } from "@nestjs/passport";
+import { Roles } from "./../roles_guard/roles.decorator";
+import { RolesGuard } from "./../roles_guard/roles_guard";
+import { ErrorMessages } from "./../exceptions/exceptions";
 import { IHeader } from "./../common/common_interfaces.d";
 import { DtoAvatarIdQuery } from "./dto/avatar-queries.dto";
 import { CreateAvatarDto } from "./dto/create_avatar_dto";
@@ -13,8 +17,8 @@ import {
   Put,
   Query,
   UseGuards,
+  UnprocessableEntityException,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 import { DtoSaveAvatar } from "./dto/save_avatar.dto";
 
 @UseGuards(AuthGuard())
@@ -38,10 +42,17 @@ export class AvatarController {
     @Headers() header: IHeader
   ) {
     try {
-      return await this.avatarService.saveAvatarForUser(header.token, body);
+      const saved = await this.avatarService.saveAvatarForUser(
+        header.token,
+        body
+      );
+      return { saved };
     } catch (e) {
       const errorMessage = String(e.message);
       console.log(errorMessage);
+      if (errorMessage.includes(ErrorMessages.LINK_NOT_RELATE_TO_AVATAR)) {
+        throw new UnprocessableEntityException(errorMessage).getResponse();
+      }
       throw new InternalServerErrorException();
     }
   }
@@ -67,7 +78,8 @@ export class AvatarController {
       throw new InternalServerErrorException();
     }
   }
-
+  @Roles("admin")
+  @UseGuards(RolesGuard)
   @Post("create")
   async createAvatarInfo(@Body() dto: CreateAvatarDto) {
     try {

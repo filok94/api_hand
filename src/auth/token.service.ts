@@ -1,8 +1,9 @@
+import { ErrorMessages } from "./../exceptions/exceptions";
 import { User, UserDocument } from "./schemas/user.schema";
 import { UserDto } from "./dto/create-user.dto";
 import { Token, TokenDocument } from "./schemas/token.schema";
 import { Injectable } from "@nestjs/common";
-import { InjectModel, Schema } from "@nestjs/mongoose";
+import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { JwtService } from "@nestjs/jwt";
 import mongoose from "mongoose";
@@ -74,7 +75,9 @@ export class TokenService {
       const tokenDocument = await this.tokenModel.findOne({
         refresh_token: token,
       });
-
+      if (tokenDocument === null) {
+        throw new Error(ErrorMessages.CANNOT_FIND_TOKEN);
+      }
       const userDocument = await this.userModel.findById(tokenDocument.user);
       const decodedRefreshToken = this.jwtService.decode(String(token));
 

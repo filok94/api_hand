@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "../auth/schemas/user.schema";
 import { Model } from "mongoose";
+import mongoose from "mongoose";
 @Injectable()
 export class UserService {
   constructor(
@@ -17,18 +18,20 @@ export class UserService {
     }
   }
 
-  async getUserByEmail(email: string): Promise<User> {
+  async getUserById(
+    id: string | mongoose.Schema.Types.ObjectId
+  ): Promise<UserDocument> {
     try {
-      const user = await this.userModel.findOne({ email }).exec();
-      return user;
+      return await this.userModel.findById(id);
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async getAllTokens() {
+  async getUserByEmail(email: string): Promise<User> {
     try {
-      return await this.tokenService.getAllTokens();
+      const user = await this.userModel.findOne({ email }).exec();
+      return user;
     } catch (e) {
       throw new Error(e);
     }

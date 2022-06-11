@@ -1,3 +1,4 @@
+import { UserModule } from "./../users/user.module";
 import { AdminPersonController } from "./person.admin.controller";
 import { PersonController } from "./person.controller";
 import { AuthModule } from "./../auth/auth.module";
@@ -26,6 +27,7 @@ import { ValidateIndexesConstraint } from "./dto/validators/validate_index";
       { name: UserGames.name, schema: UserGamesSchema },
     ]),
     AuthModule,
+    UserModule,
   ],
   controllers: [
     GamesController,

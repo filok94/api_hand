@@ -1,3 +1,4 @@
+import { AuthGuard } from "@nestjs/passport";
 import { IReturnedCalculatedData } from "./games.interface.d";
 import { IReturnedOneQuestion } from "./games.interface";
 import { DtoCalculate } from "./dto/calculate.dto";
@@ -8,13 +9,12 @@ import {
   Controller,
   Get,
   Query,
-  UseGuards,
   BadRequestException,
   InternalServerErrorException,
   Headers,
   Put,
+  UseGuards,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 import { DtoGameIdQuery } from "./dto/queries.dto";
 import { IHeader } from "src/common/common_interfaces";
 

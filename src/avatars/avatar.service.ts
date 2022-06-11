@@ -1,3 +1,4 @@
+import { ErrorMessages } from "./../exceptions/exceptions";
 import { DtoSaveAvatar } from "./dto/save_avatar.dto";
 import { TokenService } from "./../auth/token.service";
 import {
@@ -79,6 +80,11 @@ export class AvatarService {
   ): Promise<boolean> {
     try {
       const userId = await this.tokenService.getUserByToken(userToken);
+      const avatarLinkInDb = (await this.getAvatarById(avatarInfo.avatar))
+        .base_link;
+      if (!avatarInfo.full_link.includes(avatarLinkInDb)) {
+        throw new Error(ErrorMessages.LINK_NOT_RELATE_TO_AVATAR);
+      }
       const newRecord = await this.userAvatarModel.updateOne(
         {
           user: userId,
