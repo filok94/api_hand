@@ -59,7 +59,7 @@ export class AvatarProps {
 }
 export const AvatarPropsSchema = SchemaFactory.createForClass(AvatarProps);
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, _id: false, id: false })
 export class UserAvatar {
   @Prop({
     type: String,

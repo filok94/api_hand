@@ -1,8 +1,8 @@
 import { AuthGuard } from "@nestjs/passport";
-import { Roles } from "./../roles_guard/roles.decorator";
-import { RolesGuard } from "./../roles_guard/roles_guard";
-import { ErrorMessages } from "./../exceptions/exceptions";
-import { IHeader } from "./../common/common_interfaces.d";
+import { Roles } from "../roles_guard/roles.decorator";
+import { RolesGuard } from "../roles_guard/roles_guard";
+import { ErrorMessages } from "../exceptions/exceptions";
+import { IHeader } from "../common/common_interfaces";
 import { DtoAvatarIdQuery } from "./dto/avatar-queries.dto";
 import { CreateAvatarDto } from "./dto/create_avatar_dto";
 import { AvatarService } from "./avatar.service";
@@ -72,8 +72,8 @@ export class AvatarController {
   @Get()
   async getById(@Query() query: DtoAvatarIdQuery) {
     try {
-      const avatar = await this.avatarService.getAvatarById(query.avatar_id);
-      return avatar;
+      const avatar = await this.avatarService.getAvatarById(query.avatar_id)
+      return avatar
     } catch (e) {
       throw new InternalServerErrorException();
     }
