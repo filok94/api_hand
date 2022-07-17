@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Document } from "mongoose";
 
 export type GameDocument = Game & Document;
-export const maxAnswersCount = Number(process.env.MAX_ANSWERS_COUNT);
+export const maxAnswersCount = 4;
 @Schema({
   versionKey: false,
 })

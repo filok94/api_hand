@@ -14,14 +14,14 @@ export class Person {
 
   @Prop({
     required: true,
-    maxlength: 150,
+    maxlength: 250,
     type: String,
   })
   description: string;
 
   @Prop({
     required: true,
-    maxlength: 150,
+    maxlength: 350,
     type: String,
   })
   link: string;

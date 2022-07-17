@@ -37,7 +37,9 @@ export class AuthController {
         return { access_token, refresh_token };
       }
     } catch (e) {
-      if (e.message == ErrorMessages.ALREADY_IN_USE) {
+      const errorMessage = String(e.message);
+      console.log(errorMessage);
+      if (errorMessage == ErrorMessages.ALREADY_IN_USE) {
         throw new ConflictException().getResponse();
       } else {
         throw new InternalServerErrorException().getResponse();
@@ -58,7 +60,9 @@ export class AuthController {
         e.message.includes("Cannot read properties") ||
         e.message.includes("wrong password")
       ) {
-        throw new UnauthorizedException().getResponse();
+        throw new UnauthorizedException(
+          "invalid user or password"
+        ).getResponse();
       } else {
         throw new InternalServerErrorException().getResponse();
       }
@@ -69,10 +73,10 @@ export class AuthController {
   @HttpCode(200)
   async refreshTokens(@Body() dto: RefreshTokenDto) {
     try {
-      const { access_token, refresh_token } =
+      const { access_token, refresh_token, user } =
         await this.tokenService.refreshTokens(dto.refresh_token);
 
-      return { access_token, refresh_token };
+      return { access_token, refresh_token, user };
     } catch (e) {
       const errorMessage = String(e.message);
       console.log(e.message);

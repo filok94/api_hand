@@ -39,7 +39,7 @@ export class TokenService {
   async createToken(payload: UserDto): Promise<Token> {
     try {
       const userId = await (
-        await this.userModel.findOne({ email: payload.email })
+        await this.userModel.findOne({ login: payload.login })
       ).id;
       const accessToken = () => this.jwtService.sign({ userId });
       const refreshToken = () =>

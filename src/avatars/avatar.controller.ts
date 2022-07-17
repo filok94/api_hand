@@ -72,8 +72,7 @@ export class AvatarController {
   @Get()
   async getById(@Query() query: DtoAvatarIdQuery) {
     try {
-      const avatar = await this.avatarService.getAvatarById(query.avatar_id)
-      return avatar
+      return await this.avatarService.getAvatarById(query.avatar_id);
     } catch (e) {
       throw new InternalServerErrorException();
     }

@@ -1,11 +1,16 @@
+import { ErrorMessages } from "./../exceptions/exceptions";
+import { SetUserAdminDto } from "./dto/set_user_admin.dto";
 import { RolesGuard } from "./../roles_guard/roles_guard";
 import { Roles } from "./../roles_guard/roles.decorator";
 import { AuthGuard } from "@nestjs/passport";
 import { UserService } from "./user.service";
 import {
+  BadRequestException,
+  Body,
   Controller,
   Get,
   InternalServerErrorException,
+  Post,
   UseGuards,
 } from "@nestjs/common";
 
@@ -16,10 +21,25 @@ export class UserController {
 
   @Roles("admin")
   @Get("/get_all")
-  getAllUsers() {
+  async getAllUsers() {
     try {
-      return this.userService.getAllUsers();
+      return await this.userService.getAllUsers();
     } catch (e) {
+      throw new InternalServerErrorException().getResponse();
+    }
+  }
+
+  @Roles("admin")
+  @Post("/set_admin")
+  async setUserAdmin(@Body() dto: SetUserAdminDto) {
+    try {
+      return await this.userService.setUserAdmin(dto);
+    } catch (e) {
+      const errorMessage = String(e.message);
+      console.error(errorMessage);
+      if (errorMessage.includes(ErrorMessages.CANNOT_FIND_LOGIN)) {
+        throw new BadRequestException(errorMessage).getResponse();
+      }
       throw new InternalServerErrorException().getResponse();
     }
   }

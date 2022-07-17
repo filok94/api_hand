@@ -18,8 +18,8 @@ export class RolesGuard implements CanActivate {
     if (!roles) {
       return true;
     }
-    const user = await this.tokenService.getUserByToken(token);
-    const isAdmin = (await this.userService.getUserById(user)).isAdmin;
-    return isAdmin;
+    const userId = await this.tokenService.getUserByToken(token);
+    const user = await this.userService.getUserById(userId);
+    return user.is_admin;
   }
 }

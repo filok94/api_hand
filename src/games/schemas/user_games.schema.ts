@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Document } from "mongoose";
 import { IReturnedCalculatedResult } from "../games.interface";
 
-export const maxAnswersCount = Number(process.env.MAX_ANSWERS_COUNT);
+export const maxAnswersCount = 4;
 
 @Schema({
   _id: false,

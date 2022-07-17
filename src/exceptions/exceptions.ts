@@ -10,6 +10,7 @@ export class ErrorMessages {
   static CANNOT_FIND_GAME = "Cannot find game by this id";
   static CANNOT_FIND_TOKEN = "cannot find user with this token";
   static LINK_NOT_RELATE_TO_AVATAR = "link does not relate to this avatar id";
+  static CANNOT_FIND_LOGIN = "Cannot find user with this login";
 }
 
 export class ExcepitonsStrings {

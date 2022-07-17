@@ -7,7 +7,9 @@ import { useContainer } from "class-validator";
 const start = async () => {
   try {
     const PORT = process.env.PORT;
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+      cors: true,
+    });
 
     app.useGlobalPipes(
       new ValidationPipe({
