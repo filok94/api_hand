@@ -20,7 +20,6 @@ export class PersonController {
       return await this.personService.getPersonById(query.id);
     } catch (e) {
       const errorMessage = String(e.message);
-      console.log(errorMessage);
       if (
         errorMessage.includes(ExcepitonsStrings.CAST_ERROR) ||
         errorMessage.includes(ExcepitonsStrings.CANNOT_READ_NULL)
@@ -30,6 +29,7 @@ export class PersonController {
           HttpStatus.BAD_REQUEST
         );
       }
+      console.log(errorMessage);
       throw new InternalServerErrorException().getResponse();
     }
   }

@@ -55,7 +55,6 @@ export class GamesController {
       return await this.gamesService.getResultData(body, headers.token);
     } catch (e) {
       const errorMessage = String(e.message);
-      console.error(errorMessage);
       throw new InternalServerErrorException().getResponse();
     }
   }
@@ -72,7 +71,6 @@ export class GamesController {
       });
     } catch (e) {
       const errorMessage = String(e.message);
-      console.log(errorMessage);
       const errorHaveNoResultsOnThisGame =
         ExcepitonsStrings.CANNOT_READ_NULL + " (reading '_id')";
 
@@ -81,6 +79,7 @@ export class GamesController {
           message: "user have no results on this game",
         });
       }
+      console.log(errorMessage);
       throw new InternalServerErrorException().getResponse();
     }
   }

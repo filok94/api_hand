@@ -65,9 +65,7 @@ export class ValidateIndexesConstraint implements ValidatorConstraintInterface {
       }
       this.#returnMessage = "cannot find indexes for unknown id";
       return true;
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   }
   defaultMessage(): string {
     return this.#returnMessage;

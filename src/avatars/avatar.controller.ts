@@ -49,10 +49,10 @@ export class AvatarController {
       return { saved };
     } catch (e) {
       const errorMessage = String(e.message);
-      console.log(errorMessage);
       if (errorMessage.includes(ErrorMessages.LINK_NOT_RELATE_TO_AVATAR)) {
         throw new UnprocessableEntityException(errorMessage).getResponse();
       }
+      console.log(errorMessage);
       throw new InternalServerErrorException();
     }
   }
@@ -86,10 +86,10 @@ export class AvatarController {
       return { id: avatarId };
     } catch (e) {
       const errorMessage = String(e.message);
-      console.log(errorMessage);
       if (errorMessage.includes("E11000")) {
         throw new BadRequestException();
       }
+      console.log(errorMessage);
       throw new InternalServerErrorException().getResponse();
     }
   }

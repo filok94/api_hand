@@ -38,10 +38,10 @@ export class AuthController {
       }
     } catch (e) {
       const errorMessage = String(e.message);
-      console.log(errorMessage);
       if (errorMessage == ErrorMessages.ALREADY_IN_USE) {
         throw new ConflictException().getResponse();
       } else {
+        console.log(errorMessage);
         throw new InternalServerErrorException().getResponse();
       }
     }
@@ -55,7 +55,6 @@ export class AuthController {
         await this.authService.signIn(dto);
       return { user, access_token, refresh_token };
     } catch (e) {
-      console.log(e.message);
       if (
         e.message.includes("Cannot read properties") ||
         e.message.includes("wrong password")
@@ -64,6 +63,7 @@ export class AuthController {
           "invalid user or password"
         ).getResponse();
       } else {
+        console.log(e.message);
         throw new InternalServerErrorException().getResponse();
       }
     }
@@ -79,7 +79,6 @@ export class AuthController {
       return { access_token, refresh_token, user };
     } catch (e) {
       const errorMessage = String(e.message);
-      console.log(e.message);
       if (
         errorMessage.includes("user is null") ||
         errorMessage.includes("Cannot read properties of")
@@ -91,6 +90,7 @@ export class AuthController {
       } else if (errorMessage.includes(ErrorMessages.CANNOT_FIND_TOKEN)) {
         throw new BadRequestException(errorMessage).getResponse();
       } else {
+        console.log(e.message);
         throw new InternalServerErrorException().getResponse();
       }
     }
