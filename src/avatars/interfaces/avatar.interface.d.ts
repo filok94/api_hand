@@ -1,16 +1,16 @@
 export interface IPropObject {
-  prop_name: string;
-  prop_values: string[] | number[];
-  with_probability: boolean;
+	prop_name: string;
+	prop_values: string[] | number[];
+	probability: string | null;
 }
 export interface IReturnedOneAvatar {
-  ref_name: string;
-  base_link: string;
-  props: IPropObject[];
+	ref_name: string;
+	base_link: string;
+	props: IPropObject[];
 }
 
 export interface IAllAvatar {
-  ref_name: string;
-  base_link: string;
-  id: mongoose.Schema.Types.ObjectId;
+	ref_name: string;
+	base_link: string;
+	id: mongoose.Schema.Types.ObjectId;
 }

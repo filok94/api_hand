@@ -3,6 +3,7 @@ import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { TokenService } from "src/auth/token.service";
 
+type req = { headers: { token: string } };
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
@@ -13,7 +14,7 @@ export class RolesGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<string[]>("roles", context.getHandler());
-    const request = context.switchToHttp().getRequest();
+    const request: req = context.switchToHttp().getRequest();
     const token = request.headers.token;
     if (!roles) {
       return true;
