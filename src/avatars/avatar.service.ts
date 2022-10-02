@@ -50,13 +50,11 @@ export class AvatarService {
 		id: mongoose.Schema.Types.ObjectId
 	): Promise<IReturnedOneAvatar> {
 		try {
-			// const avatarProps: IPropObject[] = [];
 			const avatar = await this.avatarModel.findById(id);
+			const propById = await this.avatarPropsModel.find({
+				_id: { $in: avatar.props },
+			});
 
-			const propById = await this.avatarPropsModel
-				.find()
-				.where("id")
-				.in(avatar.props);
 			const avatarProps = propById.map((e) => {
 				return {
 					prop_name: e.prop_name,

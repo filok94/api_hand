@@ -11,48 +11,42 @@ import loginDto from "./dto/login-dto";
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private tokenService: TokenService
-  ) {}
+	constructor(
+		@InjectModel(User.name) private userModel: Model<UserDocument>,
+		private tokenService: TokenService
+	) {}
 
-  async signUp(dto: UserDto): Promise<Token | number> {
-    try {
-      const isNotUnique = await this.userModel.findOne({ login: dto.login });
-      if (isNotUnique) {
-        return HttpStatus.CONFLICT;
-      } else {
-        const hashPassword = await bcrypt.hash(dto.password, 12);
-        const user = await this.userModel.create({
-          password: hashPassword,
-          login: dto.login,
-          is_admin: false,
-        });
-        await user.save();
+	async signUp(dto: UserDto): Promise<Token> {
+		try {
+			const hashPassword = await bcrypt.hash(dto.password, 12);
+			await this.userModel.create({
+				password: hashPassword,
+				login: dto.login,
+				is_admin: false,
+			});
 
-        const tokens = await this.signIn({
-          login: dto.login,
-          password: dto.password,
-        });
-        return tokens;
-      }
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
+			const tokens = await this.signIn({
+				login: dto.login,
+				password: dto.password,
+			});
+			return tokens;
+		} catch (e) {
+			throw new Error(e);
+		}
+	}
 
-  async signIn(dto: loginDto): Promise<Token> {
-    try {
-      const user = await this.userModel.findOne({ login: dto.login });
-      const isPassword = await bcrypt.compare(dto.password, user.password);
+	async signIn(dto: loginDto): Promise<Token> {
+		try {
+			const user = await this.userModel.findOne({ login: dto.login });
+			const isPassword = await bcrypt.compare(dto.password, user.password);
 
-      if (user && isPassword) {
-        return await this.tokenService.createToken({ ...dto });
-      } else {
-        throw new Error("wrong password");
-      }
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
+			if (user && isPassword) {
+				return await this.tokenService.createToken({ ...dto });
+			} else {
+				throw new Error("wrong password");
+			}
+		} catch (e) {
+			throw new Error(e);
+		}
+	}
 }
