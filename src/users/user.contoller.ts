@@ -5,42 +5,44 @@ import { Roles } from "./../roles_guard/roles.decorator";
 import { AuthGuard } from "@nestjs/passport";
 import { UserService } from "./user.service";
 import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  InternalServerErrorException,
-  Post,
-  UseGuards,
+	BadRequestException,
+	Body,
+	Controller,
+	Get,
+	HttpCode,
+	InternalServerErrorException,
+	Post,
+	UseGuards,
 } from "@nestjs/common";
 
 @UseGuards(AuthGuard(), RolesGuard)
 @Controller("users")
 export class UserController {
-  constructor(private userService: UserService) {}
+	constructor(private userService: UserService) {}
 
-  @Roles("admin")
-  @Get("/get_all")
-  async getAllUsers() {
-    try {
-      return await this.userService.getAllUsers();
-    } catch (e) {
-      throw new InternalServerErrorException().getResponse();
-    }
-  }
+	@Roles("admin")
+	@Get("/get_all")
+	async getAllUsers() {
+		try {
+			return await this.userService.getAllUsers();
+		} catch (e) {
+			throw new InternalServerErrorException();
+		}
+	}
 
-  @Roles("admin")
-  @Post("/set_admin")
-  async setUserAdmin(@Body() dto: SetUserAdminDto) {
-    try {
-      return await this.userService.setUserAdmin(dto);
-    } catch (e) {
-      const errorMessage = String(e.message);
-      console.error(errorMessage);
-      if (errorMessage.includes(ErrorMessages.CANNOT_FIND_LOGIN)) {
-        throw new BadRequestException(errorMessage).getResponse();
-      }
-      throw new InternalServerErrorException().getResponse();
-    }
-  }
+	@Roles("admin")
+	@Post("/set_admin")
+	@HttpCode(200)
+	async setUserAdmin(@Body() dto: SetUserAdminDto) {
+		try {
+			return await this.userService.setUserAdmin(dto);
+		} catch (e) {
+			const errorMessage = String(e.message);
+			console.error(errorMessage);
+			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_LOGIN)) {
+				throw new BadRequestException(errorMessage);
+			}
+			throw new InternalServerErrorException();
+		}
+	}
 }

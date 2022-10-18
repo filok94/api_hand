@@ -1,12 +1,10 @@
 import { SetUserAdminDto } from "./dto/set_user_admin.dto";
 import { ErrorMessages } from "./../exceptions/exceptions";
-import { TokenService } from "./../auth/token.service";
-import { Injectable } from "@nestjs/common";
+import { HttpCode, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "../auth/schemas/user.schema";
 import { Model } from "mongoose";
 import mongoose from "mongoose";
-import { use } from "passport";
 @Injectable()
 export class UserService {
 	constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
@@ -27,7 +25,7 @@ export class UserService {
 			throw new Error(e);
 		}
 	}
-
+	@HttpCode(200)
 	async setUserAdmin(dto: SetUserAdminDto): Promise<boolean> {
 		try {
 			const user = await this.userModel.findOneAndUpdate(

@@ -1,5 +1,3 @@
-import { ExcepitonsStrings } from "./../exceptions/exceptions";
-import { Token } from "./schemas/token.schema";
 import { TokenService } from "./token.service";
 import { ErrorMessages } from "../exceptions/exceptions";
 import { UserDto } from "./dto/create-user.dto";
@@ -36,16 +34,15 @@ export class AuthController {
 		} catch (e) {
 			const errorMessage = String(e.message);
 			if (errorMessage.includes(ErrorMessages.DUPLICATES_10011)) {
-				throw new ConflictException().getResponse();
+				throw new ConflictException();
 			} else {
 				console.log(errorMessage);
-				throw new InternalServerErrorException().getResponse();
+				throw new InternalServerErrorException();
 			}
 		}
 	}
 
 	@Post("/sign_in")
-	@HttpCode(200)
 	async login(@Body() dto: loginDto) {
 		try {
 			const { user, access_token, refresh_token } =
@@ -56,12 +53,10 @@ export class AuthController {
 				e.message.includes("Cannot read properties") ||
 				e.message.includes("wrong password")
 			) {
-				throw new UnauthorizedException(
-					"invalid user or password"
-				).getResponse();
+				throw new UnauthorizedException("invalid user or password");
 			} else {
 				console.log(e.message);
-				throw new InternalServerErrorException().getResponse();
+				throw new InternalServerErrorException();
 			}
 		}
 	}
@@ -80,15 +75,12 @@ export class AuthController {
 				errorMessage.includes("user is null") ||
 				errorMessage.includes("Cannot read properties of")
 			) {
-				throw new HttpException(
-					ErrorMessages.NOT_FOUND,
-					HttpStatus.NOT_FOUND
-				).getResponse();
+				throw new HttpException(ErrorMessages.NOT_FOUND, HttpStatus.NOT_FOUND);
 			} else if (errorMessage.includes(ErrorMessages.CANNOT_FIND_TOKEN)) {
-				throw new BadRequestException(errorMessage).getResponse();
+				throw new BadRequestException(errorMessage);
 			} else {
 				console.log(e.message);
-				throw new InternalServerErrorException().getResponse();
+				throw new InternalServerErrorException();
 			}
 		}
 	}

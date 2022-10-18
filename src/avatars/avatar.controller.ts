@@ -32,7 +32,7 @@ export class AvatarController {
 			return await this.avatarService.getAllAvatars();
 		} catch (e) {
 			console.log(e.message);
-			throw new InternalServerErrorException().getResponse();
+			throw new InternalServerErrorException();
 		}
 	}
 
@@ -50,7 +50,7 @@ export class AvatarController {
 		} catch (e) {
 			const errorMessage = String(e.message);
 			if (errorMessage.includes(ErrorMessages.LINK_NOT_RELATE_TO_AVATAR)) {
-				throw new UnprocessableEntityException(errorMessage).getResponse();
+				throw new UnprocessableEntityException(errorMessage);
 			}
 			console.log(errorMessage);
 			throw new InternalServerErrorException();
@@ -90,7 +90,7 @@ export class AvatarController {
 				throw new BadRequestException();
 			}
 			console.log(errorMessage);
-			throw new InternalServerErrorException().getResponse();
+			throw new InternalServerErrorException();
 		}
 	}
 }
