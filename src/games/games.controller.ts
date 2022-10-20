@@ -2,7 +2,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { IReturnedCalculatedData } from "./games.interface.d";
 import { IReturnedOneQuestion } from "./games.interface";
 import { DtoCalculate } from "./dto/calculate.dto";
-import { ExcepitonsStrings } from "../exceptions/exceptions";
+import { ErrorMessages, ExcepitonsStrings } from "../exceptions/exceptions";
 import { GamesService } from "./games.service";
 import {
 	Body,
@@ -14,6 +14,7 @@ import {
 	Headers,
 	Put,
 	UseGuards,
+	NotFoundException,
 } from "@nestjs/common";
 import { DtoGameIdQuery } from "./dto/queries.dto";
 import { IHeader } from "src/common/common_interfaces";
@@ -52,8 +53,14 @@ export class GamesController {
 		@Headers() headers: IHeader
 	): Promise<IReturnedCalculatedData> {
 		try {
-			return await this.gamesService.getResultData(body, headers.token);
+			return await this.gamesService.setResultData(body, headers.token);
 		} catch (e) {
+			const errorMessage = String(e.message);
+			if (errorMessage.includes(ErrorMessages.WRONG_GAME_ID)) {
+				throw new NotFoundException(errorMessage);
+			} else if (errorMessage.includes(ErrorMessages.WRONG_QUESTION_DATA)) {
+				throw new BadRequestException(errorMessage);
+			}
 			throw new InternalServerErrorException();
 		}
 	}

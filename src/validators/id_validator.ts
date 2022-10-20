@@ -1,6 +1,5 @@
 import { AvatarService } from "./../avatars/avatar.service";
 import { PersonService } from "./../games/person.service";
-import { GamesService } from "./../games/games.service";
 
 import mongoose from "mongoose";
 
@@ -19,7 +18,6 @@ export class IsIdExistsAndCorrectConstraint
 	implements ValidatorConstraintInterface
 {
 	constructor(
-		private gameService: GamesService,
 		private personService: PersonService,
 		private avatarService: AvatarService
 	) {}
@@ -36,15 +34,7 @@ export class IsIdExistsAndCorrectConstraint
 		}
 
 		//проверка существует ли такой айди в базе
-
 		switch (idType) {
-			case "game":
-				const idGame = await this.gameService.adminGetGameById(id);
-				if (idGame.game == null) {
-					this.returnMessage = `cannot find game with this id`;
-					return false;
-				}
-				break;
 			case "person":
 				const personId = await this.personService.getPersonById(id);
 				if (personId == null) {

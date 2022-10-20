@@ -12,6 +12,8 @@ export class ErrorMessages {
 	static LINK_NOT_RELATE_TO_AVATAR = "link does not relate to this avatar id";
 	static CANNOT_FIND_LOGIN = "Cannot find user with this login";
 	static DUPLICATES_10011 = "duplicate key error collection";
+	static WRONG_QUESTION_DATA = "wrong questions data";
+	static WRONG_GAME_ID = "wrong game id";
 }
 
 export class ExcepitonsStrings {
