@@ -8,7 +8,6 @@ import {
 	GameSchema,
 	TestData,
 	TestDataSchema,
-	// TestDataSchema,
 } from "./schemas/game.schema";
 import { MongooseModule } from "@nestjs/mongoose";
 import { GamesService } from "./games.service";

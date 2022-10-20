@@ -8,6 +8,7 @@ export const maxAnswersCount = 4;
 @Schema({
 	versionKey: false,
 	_id: false,
+	autoCreate: false,
 })
 export class TestData {
 	@Prop({
