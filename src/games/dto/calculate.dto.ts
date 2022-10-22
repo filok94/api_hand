@@ -10,12 +10,12 @@ import {
 	ValidateNested,
 } from "class-validator";
 import mongoose from "mongoose";
-import { IsIdExistsAndCorrect } from "../../validators/id_validator";
+import { IsIdCorrect } from "../../validators/id_validator";
 
 export class DtoCalculate {
 	@IsNotEmpty()
 	@IsString()
-	@IsIdExistsAndCorrect("game")
+	@IsIdCorrect("game")
 	readonly game_id: mongoose.Schema.Types.ObjectId;
 
 	@ValidateNested({ each: true })

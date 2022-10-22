@@ -7,8 +7,6 @@ import { CreateAvatarDto } from "./dto/create_avatar_dto";
 import {
 	Avatar,
 	AvatarDocument,
-	AvatarProps,
-	AvatarPropsDocument,
 	UserAvatar,
 	UserAvatarDocument,
 } from "./schemas/avatar.schema";
@@ -21,8 +19,6 @@ import mongoose from "mongoose";
 export class AvatarService {
 	constructor(
 		@InjectModel(Avatar.name) private avatarModel: Model<AvatarDocument>,
-		@InjectModel(AvatarProps.name)
-		private avatarPropsModel: Model<AvatarPropsDocument>,
 		@InjectModel(UserAvatar.name)
 		private userAvatarModel: Model<UserAvatarDocument>,
 		private tokenService: TokenService
@@ -30,17 +26,13 @@ export class AvatarService {
 
 	async getAllAvatars(): Promise<IAllAvatar[]> {
 		try {
-			const avatarsInDb = await this.avatarModel.find();
-			const returnedAvatars: IAllAvatar[] = avatarsInDb.map(
-				(e: AvatarDocument) => {
-					return {
-						ref_name: e.ref_name,
-						base_link: e.base_link,
-						id: e.id,
-					};
-				}
-			);
-			return returnedAvatars;
+			const avatarsMapped = await this.avatarModel.aggregate<IAllAvatar>([
+				{
+					$project: { ref_name: 1, base_link: 1, id: 1 },
+				},
+			]);
+
+			return avatarsMapped;
 		} catch (e) {
 			throw new Error(e);
 		}
@@ -50,23 +42,19 @@ export class AvatarService {
 		id: mongoose.Schema.Types.ObjectId
 	): Promise<IReturnedOneAvatar> {
 		try {
-			const avatar = await this.avatarModel.findById(id);
-			const propById = await this.avatarPropsModel.find({
-				_id: { $in: avatar.props },
-			});
-
-			const avatarProps = propById.map((e) => {
-				return {
-					prop_name: e.prop_name,
-					prop_values: e.values,
-					probability: e.probability,
-				};
-			});
-
+			const avatarsMapped =
+				await this.avatarModel.aggregate<IReturnedOneAvatar>([
+					{ $match: { _id: new mongoose.Types.ObjectId(String(id)) } },
+					{
+						$project: { ref_name: 1, base_link: 1, _id: 1, props: 1 },
+					},
+				]);
+			//error handling
+			if (!avatarsMapped.length) {
+				throw new Error(ErrorMessages.CANNOT_FIND_AVATAR);
+			}
 			return {
-				ref_name: avatar.ref_name,
-				base_link: avatar.base_link,
-				props: avatarProps,
+				...avatarsMapped[0],
 			};
 		} catch (e) {
 			throw new Error(e);
@@ -78,22 +66,32 @@ export class AvatarService {
 		avatarInfo: DtoSaveAvatar
 	): Promise<boolean> {
 		try {
-			const userId = await this.tokenService.getUserByToken(userToken);
+			const user = await this.tokenService.getUserByToken(userToken);
 			const avatarLinkInDb = (await this.getAvatarById(avatarInfo.avatar))
 				.base_link;
-			if (!avatarInfo.full_link.includes(avatarLinkInDb)) {
+
+			// error handling
+			const linkAndIdComparingCheck =
+				avatarInfo.full_link.includes(avatarLinkInDb);
+			const idExistingCheck = avatarLinkInDb != undefined;
+			if (!idExistingCheck) {
+				throw new Error(ErrorMessages.CANNOT_FIND_AVATAR);
+			}
+			if (!linkAndIdComparingCheck) {
 				throw new Error(ErrorMessages.LINK_NOT_RELATE_TO_AVATAR);
 			}
+
+			//recording
 			const newRecord = await this.userAvatarModel.updateOne(
 				{
-					user: userId,
+					user: user.id,
 				},
 				{
-					user: userId,
+					user: user._id,
 					full_link: avatarInfo.full_link,
 					avatar: avatarInfo.avatar,
 				},
-				{ new: true, upsert: true, rawResult: true }
+				{ new: true, upsert: true, rawResult: true, strict: false }
 			);
 
 			return newRecord.acknowledged;
@@ -104,23 +102,26 @@ export class AvatarService {
 
 	async getUserAvatarLink(token: string): Promise<string> {
 		try {
-			const userId = await this.tokenService.getUserByToken(token);
-			const usersAvatar = await this.userAvatarModel.findOne({ user: userId });
-			if (!usersAvatar) {
+			const avatarInfo = await this.userAvatarModel.aggregate<{
+				full_link: string;
+			}>([
+				{
+					$lookup: {
+						from: "tokens",
+						foreignField: "user",
+						localField: "user",
+						as: "tokensObj",
+					},
+				},
+				{ $match: { "tokensObj.access_token": token } },
+				{ $project: { full_link: true, _id: false } },
+			]);
+			if (avatarInfo.length === 0) {
 				return (await this.avatarModel.find())[0].base_link;
 			}
-			return usersAvatar.full_link;
+			return avatarInfo[0].full_link;
 		} catch (e) {
 			throw new Error(e);
-		}
-	}
-
-	async isAvatarExists(id: mongoose.Schema.Types.ObjectId): Promise<boolean> {
-		try {
-			const avatar = await (await this.avatarModel.findById(id)).id;
-			if (avatar != null) return true;
-		} catch (e) {
-			return false;
 		}
 	}
 
@@ -128,16 +129,10 @@ export class AvatarService {
 		dto: CreateAvatarDto
 	): Promise<mongoose.Schema.Types.ObjectId> {
 		try {
-			const ids = [];
-			(await this.avatarPropsModel.create(dto.props)).forEach((e) =>
-				ids.push(e.id)
-			);
-			const avatarInfo = await this.avatarModel.create({
-				ref_name: dto.ref_name,
-				base_link: dto.base_link,
-				props: ids,
+			const avatarNewObject = await this.avatarModel.create({
+				...dto,
 			});
-			return avatarInfo._id;
+			return avatarNewObject._id;
 		} catch (e) {
 			throw new Error(e);
 		}

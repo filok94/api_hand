@@ -5,6 +5,7 @@ import {
 	HttpException,
 	HttpStatus,
 	InternalServerErrorException,
+	NotFoundException,
 	Query,
 } from "@nestjs/common";
 import { ErrorMessages, ExcepitonsStrings } from "../exceptions/exceptions";
@@ -28,6 +29,9 @@ export class PersonController {
 					ErrorMessages.NOT_FOUND,
 					HttpStatus.BAD_REQUEST
 				);
+			}
+			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_PERSON)) {
+				throw new NotFoundException(errorMessage);
 			}
 			console.log(errorMessage);
 			throw new InternalServerErrorException();

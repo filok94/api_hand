@@ -18,6 +18,7 @@ import {
 	Query,
 	UseGuards,
 	UnprocessableEntityException,
+	NotFoundException,
 } from "@nestjs/common";
 import { DtoSaveAvatar } from "./dto/save_avatar.dto";
 
@@ -52,6 +53,9 @@ export class AvatarController {
 			if (errorMessage.includes(ErrorMessages.LINK_NOT_RELATE_TO_AVATAR)) {
 				throw new UnprocessableEntityException(errorMessage);
 			}
+			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_AVATAR)) {
+				throw new NotFoundException(errorMessage);
+			}
 			console.log(errorMessage);
 			throw new InternalServerErrorException();
 		}
@@ -74,6 +78,10 @@ export class AvatarController {
 		try {
 			return await this.avatarService.getAvatarById(query.avatar_id);
 		} catch (e) {
+			const errorMessage = String(e.message);
+			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_AVATAR)) {
+				throw new NotFoundException(errorMessage);
+			}
 			throw new InternalServerErrorException();
 		}
 	}

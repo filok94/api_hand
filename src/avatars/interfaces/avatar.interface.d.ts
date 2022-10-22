@@ -1,6 +1,6 @@
 export interface IPropObject {
 	prop_name: string;
-	prop_values: string[] | number[];
+	values: string[] | number[];
 	probability: string | null;
 }
 export interface IReturnedOneAvatar {

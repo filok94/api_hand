@@ -8,35 +8,9 @@ export type UserAvatarDocument = UserAvatar & Document;
 
 @Schema({
 	versionKey: false,
-})
-export class Avatar {
-	@Prop({
-		type: String,
-		maxLength: 100,
-		required: true,
-		unique: true,
-	})
-	ref_name: string;
-
-	@Prop({
-		type: String,
-		maxLength: 255,
-		required: true,
-		unique: true,
-	})
-	base_link: string;
-
-	@Prop({
-		type: [mongoose.Schema.Types.ObjectId],
-		required: true,
-		ref: "avatarprops",
-	})
-	props: mongoose.Schema.Types.ObjectId[];
-}
-export const AvatarSchema = SchemaFactory.createForClass(Avatar);
-
-@Schema({
-	versionKey: false,
+	_id: false,
+	autoCreate: false,
+	id: false,
 })
 export class AvatarProps {
 	@Prop({
@@ -58,6 +32,34 @@ export class AvatarProps {
 }
 export const AvatarPropsSchema = SchemaFactory.createForClass(AvatarProps);
 
+@Schema({
+	versionKey: false,
+})
+export class Avatar {
+	@Prop({
+		type: String,
+		maxLength: 100,
+		required: true,
+		unique: true,
+	})
+	ref_name: string;
+
+	@Prop({
+		type: String,
+		maxLength: 255,
+		required: true,
+		unique: true,
+	})
+	base_link: string;
+
+	@Prop({
+		type: [AvatarPropsSchema],
+		required: true,
+	})
+	props: AvatarProps[];
+}
+export const AvatarSchema = SchemaFactory.createForClass(Avatar);
+
 @Schema({ versionKey: false, _id: false, id: false })
 export class UserAvatar {
 	@Prop({
@@ -69,6 +71,7 @@ export class UserAvatar {
 	@Prop({
 		required: true,
 		type: mongoose.Schema.Types.ObjectId,
+		unique: true,
 		ref: "users",
 	})
 	user: mongoose.Schema.Types.ObjectId;
