@@ -207,26 +207,52 @@ export class GamesService {
 		data: IGetUserGameResult
 	): Promise<IReturnedGameResults> {
 		try {
-			const user = await this.tokenService.getUserByToken(data.user);
-			const gameData = await this.userGamesModel
-				.findOne({
-					game: data.game,
-					user,
-				})
-				.populate<{ person: PersonDocument }>({
-					path: "person",
-					model: this.personModel,
-				})
-				.populate<{ game: GameDocument }>({
-					path: "game",
-					model: this.gameModel,
-				})
-				.exec();
+			const gameData_1 =
+				await this.userGamesModel.aggregate<IReturnedGameResults>([
+					{
+						$lookup: {
+							from: "tokens",
+							foreignField: "user",
+							localField: "user",
+							as: "tokensObj",
+						},
+					},
+					{ $match: { "tokensObj.access_token": data.user } },
+					{
+						$lookup: {
+							from: "games",
+							foreignField: "_id",
+							localField: "game",
+							as: "game_title",
+						},
+					},
+					{
+						$lookup: {
+							from: "persons",
+							foreignField: "_id",
+							localField: "person",
+							as: "person",
+						},
+					},
+					{
+						$set: {
+							game_title: { $arrayElemAt: ["$game_title.title", 0] },
+							game_id: { $arrayElemAt: ["$game_title._id", 0] },
+							person: { $arrayElemAt: ["$person", 0] },
+						},
+					},
+					{
+						$project: {
+							game_title: true,
+							game_id: true,
+							person: true,
+							test_data: true,
+							_id: false,
+						},
+					},
+				]);
 			return {
-				game_title: gameData.game.title,
-				game_id: gameData._id,
-				person: gameData.person,
-				test_data: gameData.test_data,
+				...gameData_1[0],
 			};
 		} catch (e) {
 			throw new Error(e);
