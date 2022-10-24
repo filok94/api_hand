@@ -2,7 +2,6 @@ export class ErrorMessages {
 	static BAD_REQUEST = "Bad request";
 	static ALREADY_IN_USE = "Already in use";
 	static WRONG_USER_OR_PASSWORD = "Wrong login or password";
-	static INTERNAL_ERROR = "Internal server error";
 	static DUPLICATES = "duplicates existing";
 	static NOT_FOUND = "Not found";
 	static PERSON_NOT_FOUND = "One of persons not found";
@@ -16,6 +15,7 @@ export class ErrorMessages {
 	static DUPLICATES_10011 = "duplicate key error collection";
 	static WRONG_QUESTION_DATA = "wrong questions data";
 	static WRONG_GAME_ID = "wrong game id";
+	static CANNOT_FIND_RESULTS = "user have no results on this game";
 }
 
 export class ExcepitonsStrings {

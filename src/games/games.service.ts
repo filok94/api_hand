@@ -207,7 +207,7 @@ export class GamesService {
 		data: IGetUserGameResult
 	): Promise<IReturnedGameResults> {
 		try {
-			const gameData_1 =
+			const gameData =
 				await this.userGamesModel.aggregate<IReturnedGameResults>([
 					{
 						$lookup: {
@@ -251,8 +251,11 @@ export class GamesService {
 						},
 					},
 				]);
+			if (!gameData.length) {
+				throw new Error(ErrorMessages.CANNOT_FIND_RESULTS);
+			}
 			return {
-				...gameData_1[0],
+				...gameData[0],
 			};
 		} catch (e) {
 			throw new Error(e);

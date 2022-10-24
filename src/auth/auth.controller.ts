@@ -25,6 +25,7 @@ export class AuthController {
 	) {}
 
 	@Post("/sign_up")
+	@HttpCode(200)
 	async registrationUser(@Body() dto: UserDto) {
 		try {
 			const answer = await this.authService.signUp(dto);
@@ -43,6 +44,7 @@ export class AuthController {
 	}
 
 	@Post("/sign_in")
+	@HttpCode(200)
 	async login(@Body() dto: loginDto) {
 		try {
 			const { user, access_token, refresh_token } =

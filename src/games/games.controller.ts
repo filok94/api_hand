@@ -77,13 +77,8 @@ export class GamesController {
 			});
 		} catch (e) {
 			const errorMessage = String(e.message);
-			const errorHaveNoResultsOnThisGame =
-				ExcepitonsStrings.CANNOT_READ_NULL + " (reading '_id')";
-
-			if (errorMessage.includes(errorHaveNoResultsOnThisGame)) {
-				throw new BadRequestException({
-					message: "user have no results on this game",
-				});
+			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_RESULTS)) {
+				throw new NotFoundException(errorMessage);
 			}
 			console.log(errorMessage);
 			throw new InternalServerErrorException();
