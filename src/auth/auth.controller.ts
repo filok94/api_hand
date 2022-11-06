@@ -1,21 +1,19 @@
 import { TokenService } from "./token.service";
 import { ErrorMessages } from "../exceptions/exceptions";
-import { UserDto } from "./dto/create-user.dto";
-import loginDto from "./dto/login-dto";
+import loginDto from "./dto/login.dto";
 import {
-	BadRequestException,
 	Body,
 	ConflictException,
 	Controller,
 	HttpCode,
-	HttpException,
-	HttpStatus,
 	InternalServerErrorException,
+	NotFoundException,
 	Post,
 	UnauthorizedException,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import RefreshTokenDto from "./dto/refresh-token.dto";
+import RefreshTokenDto from "./dto/refresh_token.dto";
+import LoginDto from "./dto/login.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -26,15 +24,14 @@ export class AuthController {
 
 	@Post("/sign_up")
 	@HttpCode(200)
-	async registrationUser(@Body() dto: UserDto) {
+	async registrationUser(@Body() dto: LoginDto) {
 		try {
-			const answer = await this.authService.signUp(dto);
-			const access_token = answer.access_token;
-			const refresh_token = answer.refresh_token;
-			return { access_token, refresh_token };
+			const { access_token, refresh_token, user } =
+				await this.authService.signUp(dto);
+			return { access_token, refresh_token, user };
 		} catch (e) {
 			const errorMessage = String(e.message);
-			if (errorMessage.includes(ErrorMessages.DUPLICATES_10011)) {
+			if (errorMessage.includes(ErrorMessages.DUPLICATES_IN_COLLECTION)) {
 				throw new ConflictException();
 			} else {
 				console.log(errorMessage);
@@ -69,17 +66,14 @@ export class AuthController {
 		try {
 			const { access_token, refresh_token, user } =
 				await this.tokenService.refreshTokens(dto.refresh_token);
-
 			return { access_token, refresh_token, user };
 		} catch (e) {
 			const errorMessage = String(e.message);
-			if (
-				errorMessage.includes("user is null") ||
-				errorMessage.includes("Cannot read properties of")
-			) {
-				throw new HttpException(ErrorMessages.NOT_FOUND, HttpStatus.NOT_FOUND);
-			} else if (errorMessage.includes(ErrorMessages.CANNOT_FIND_TOKEN)) {
-				throw new BadRequestException(errorMessage);
+			if (errorMessage.includes(ErrorMessages.TOKEN_EXPIRED)) {
+				throw new UnauthorizedException(ErrorMessages.TOKEN_EXPIRED);
+			}
+			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_TOKEN)) {
+				throw new NotFoundException(ErrorMessages.CANNOT_FIND_TOKEN);
 			} else {
 				console.log(e.message);
 				throw new InternalServerErrorException();

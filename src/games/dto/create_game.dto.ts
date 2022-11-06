@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import {
 	IsArray,
+	IsMongoId,
 	IsNotEmpty,
 	IsNumber,
 	IsString,
@@ -31,6 +32,10 @@ export class DtoCreateGame {
 
 	@IsNotEmpty()
 	@IsArray()
+	@IsMongoId({
+		message: ({ property }) => `one of ${property} is incorrect id`,
+		each: true,
+	})
 	readonly persons: mongoose.Schema.Types.ObjectId[];
 }
 
@@ -45,10 +50,12 @@ export class DtoQuestionBlock {
 
 	@IsNumber()
 	@Min(0, {
-		message: "value should be 0-3",
+		message: ({ constraints, property, value }) =>
+			`${property} ${value} should be more or equal to ${constraints}`,
 	})
 	@Max(3, {
-		message: "value should be 0-3",
+		message: ({ constraints, property, value }) =>
+			`${property} ${value} should be less or equal to ${constraints}`,
 	})
 	readonly right_answer: number;
 

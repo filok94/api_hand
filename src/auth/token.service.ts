@@ -1,12 +1,11 @@
 import { ErrorMessages } from "./../exceptions/exceptions";
 import { User, UserDocument } from "./schemas/user.schema";
-import { UserDto } from "./dto/create-user.dto";
 import { Token, TokenDocument } from "./schemas/token.schema";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { JwtService } from "@nestjs/jwt";
-import mongoose from "mongoose";
+import LoginDto from "./dto/login.dto";
 
 @Injectable()
 export class TokenService {
@@ -41,7 +40,7 @@ export class TokenService {
 		}
 	}
 
-	async createToken(payload: UserDto): Promise<Token> {
+	async createToken(payload: LoginDto): Promise<Token> {
 		try {
 			const userId = await (
 				await this.userModel.findOne({ login: payload.login })
@@ -77,28 +76,45 @@ export class TokenService {
 
 	async refreshTokens(token: string) {
 		try {
-			const tokenDocument = await this.tokenModel.findOne({
-				refresh_token: token,
-			});
-			if (tokenDocument === null) {
+			const tokenDocument = await this.tokenModel.aggregate<
+				TokenDocument & { userDocument: UserDocument }
+			>([
+				{
+					$match: { refresh_token: token },
+				},
+				{
+					$lookup: {
+						from: "users",
+						foreignField: "_id",
+						localField: "user",
+						as: "userDocument",
+					},
+				},
+				{
+					$set: {
+						userDocument: { $arrayElemAt: ["$userDocument", 0] },
+					},
+				},
+				{
+					$project: {
+						userDocument: true,
+						access_token: true,
+						refresh_token: true,
+						_id: false,
+					},
+				},
+			]);
+			const decodedRefreshToken = this.jwtService.decode(String(token));
+			// validation
+			if (!tokenDocument.length) {
 				throw new Error(ErrorMessages.CANNOT_FIND_TOKEN);
 			}
-			const userDocument = await this.userModel.findById(tokenDocument.user);
-			const decodedRefreshToken = this.jwtService.decode(String(token));
-
 			const refreshTokenNotExpired =
 				new Date(decodedRefreshToken["exp"] * 1000) >= new Date(Date.now());
-
-			if (
-				userDocument != null &&
-				refreshTokenNotExpired &&
-				tokenDocument != null
-			) {
-				const newTokens = await this.createToken(userDocument);
-				return newTokens;
-			} else {
-				throw new Error("user is null");
+			if (!refreshTokenNotExpired) {
+				throw new Error(ErrorMessages.TOKEN_EXPIRED);
 			}
+			return await this.createToken(tokenDocument[0].userDocument);
 		} catch (e) {
 			throw new Error(e);
 		}

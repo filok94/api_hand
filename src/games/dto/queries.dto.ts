@@ -1,15 +1,18 @@
-import { IsNotEmpty } from "class-validator";
+import { IsMongoId, IsNotEmpty } from "class-validator";
 import mongoose from "mongoose";
-import { IsIdCorrect } from "../../validators/id_validator";
 
 export class DtoGameIdQuery {
 	@IsNotEmpty()
-	@IsIdCorrect("game")
+	@IsMongoId({
+		message: ({ property }) => `${property} is incorrect id`,
+	})
 	readonly game_id: mongoose.Schema.Types.ObjectId;
 }
 
 export class DtoPersonIdQuery {
 	@IsNotEmpty()
-	@IsIdCorrect("person")
+	@IsMongoId({
+		message: ({ property }) => `${property} is incorrect id`,
+	})
 	readonly id: mongoose.Schema.Types.ObjectId;
 }

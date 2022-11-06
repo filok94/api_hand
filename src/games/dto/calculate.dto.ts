@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import {
 	ArrayMinSize,
 	IsArray,
+	IsMongoId,
 	IsNotEmpty,
 	IsNumber,
 	IsString,
@@ -10,12 +11,13 @@ import {
 	ValidateNested,
 } from "class-validator";
 import mongoose from "mongoose";
-import { IsIdCorrect } from "../../validators/id_validator";
 
 export class DtoCalculate {
 	@IsNotEmpty()
 	@IsString()
-	@IsIdCorrect("game")
+	@IsMongoId({
+		message: ({ property }) => `${property} is incorrect id`,
+	})
 	readonly game_id: mongoose.Schema.Types.ObjectId;
 
 	@ValidateNested({ each: true })
