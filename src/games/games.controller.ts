@@ -2,29 +2,28 @@ import { AuthGuard } from "@nestjs/passport";
 import { IReturnedCalculatedData } from "./games.interface.d";
 import { IReturnedOneQuestion } from "./games.interface";
 import { DtoCalculate } from "./dto/calculate.dto";
-import { ErrorMessages, ExcepitonsStrings } from "../exceptions/exceptions";
+import { ErrorMessages } from "../exceptions/exceptions";
 import { GamesService } from "./games.service";
 import {
 	Body,
 	Controller,
 	Get,
-	Query,
 	BadRequestException,
 	InternalServerErrorException,
 	Headers,
 	Put,
 	UseGuards,
 	NotFoundException,
+	Param,
 } from "@nestjs/common";
-import { DtoGameIdQuery } from "./dto/queries.dto";
+import { DtoIdParams } from "./dto/queries.dto";
 import { IHeader } from "src/common/common_interfaces";
 
 @UseGuards(AuthGuard())
 @Controller("games")
 export class GamesController {
-	constructor(private gamesService: GamesService) {}
-
-	@Get("get_all")
+	constructor(private gamesService: GamesService) { }
+	@Get()
 	async getAllGames() {
 		try {
 			return await this.gamesService.getAllGames();
@@ -34,9 +33,9 @@ export class GamesController {
 		}
 	}
 
-	@Get("get_questions")
+	@Get(":id")
 	async getQuestionWithAnswers(
-		@Query() params: DtoGameIdQuery
+		@Param() params: DtoIdParams
 	): Promise<IReturnedOneQuestion[]> {
 		try {
 			return await this.gamesService.getQuestionsForGame(params);
@@ -47,13 +46,14 @@ export class GamesController {
 		}
 	}
 
-	@Put("calculate")
+	@Put(":id/calculate")
 	async isAnswerRight(
+		@Param() params: DtoIdParams,
 		@Body() body: DtoCalculate,
 		@Headers() headers: IHeader
 	): Promise<IReturnedCalculatedData> {
 		try {
-			return await this.gamesService.setResultData(body, headers.token);
+			return await this.gamesService.setResultData(params.id, body, headers.token);
 		} catch (e) {
 			const errorMessage = String(e.message);
 			if (errorMessage.includes(ErrorMessages.WRONG_GAME_ID)) {
@@ -65,14 +65,14 @@ export class GamesController {
 		}
 	}
 
-	@Get("get_results")
+	@Get(":id/results")
 	async getGameResultsByGameId(
-		@Query() query: DtoGameIdQuery,
+		@Param() params: DtoIdParams,
 		@Headers() headers: IHeader
 	) {
 		try {
 			return await this.gamesService.getUserResults({
-				game: query.game_id,
+				game: params.id,
 				user: headers.token,
 			});
 		} catch (e) {

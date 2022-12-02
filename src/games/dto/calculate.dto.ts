@@ -2,23 +2,14 @@ import { Type } from "class-transformer";
 import {
 	ArrayMinSize,
 	IsArray,
-	IsMongoId,
 	IsNotEmpty,
 	IsNumber,
-	IsString,
 	Max,
 	Min,
 	ValidateNested,
 } from "class-validator";
-import mongoose from "mongoose";
 
 export class DtoCalculate {
-	@IsNotEmpty()
-	@IsString()
-	@IsMongoId({
-		message: ({ property }) => `${property} is incorrect id`,
-	})
-	readonly game_id: mongoose.Schema.Types.ObjectId;
 
 	@ValidateNested({ each: true })
 	@Type(() => DtoCalculateAnswers)

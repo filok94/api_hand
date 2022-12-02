@@ -16,7 +16,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import mongoose from "mongoose";
-import { DtoGameIdQuery } from "./dto/queries.dto";
+import { DtoIdParams } from "./dto/queries.dto";
 import { TokenService } from "../auth/token.service";
 import { Person, PersonDocument } from "./schemas/person.schema";
 
@@ -28,7 +28,7 @@ export class GamesService {
 		@InjectModel(UserGames.name)
 		private userGamesModel: Model<UserGamesDocument>,
 		private tokenService: TokenService
-	) {}
+	) { }
 
 	async getAllGames(): Promise<IReturnedBriefGames[]> {
 		try {
@@ -64,25 +64,24 @@ export class GamesService {
 			const personsInDb = await this.personModel.find({
 				id: { $in: [dto.persons] },
 			});
-
-			if (personsInDb.length === dto.persons.length) {
-				const newGame = await this.gameModel.create(dto);
-
-				return newGame._id;
-			} else {
+			//validation
+			if (personsInDb.length !== dto.persons.length) {
 				throw new Error(ErrorMessages.PERSON_NOT_FOUND);
 			}
+
+			const newGame = await this.gameModel.create(dto);
+			return newGame._id;
 		} catch (e) {
 			throw new Error(e);
 		}
 	}
 
 	async getQuestionsForGame(
-		param: DtoGameIdQuery
+		param: DtoIdParams
 	): Promise<IReturnedOneQuestion[]> {
 		try {
 			const gameData = await this.gameModel.findOne({
-				game: param.game_id,
+				game: param.id,
 			});
 			const returnedArray: IReturnedOneQuestion[] = gameData.test_data.map(
 				(e) => {
@@ -126,12 +125,13 @@ export class GamesService {
 	}
 
 	async setResultData(
+		gameId: mongoose.Schema.Types.ObjectId,
 		dto: DtoCalculate,
 		userToken: string
 	): Promise<IReturnedCalculatedData> {
 		try {
 			const gameDbInfo = await this.gameModel
-				.findById(dto.game_id)
+				.findById(gameId)
 				.populate<{ persons: PersonDocument[] }>({
 					path: "persons",
 					model: this.personModel,
@@ -166,7 +166,7 @@ export class GamesService {
 			await this.linkResultToUser({
 				right_answers_count: countOfRightAnswers,
 				person: person._id,
-				game: dto.game_id,
+				game: gameId,
 				user: user.id,
 				test_data: test_result,
 			});

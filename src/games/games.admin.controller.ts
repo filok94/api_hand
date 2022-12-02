@@ -14,7 +14,7 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 import { ErrorMessages } from "../exceptions/exceptions";
 import { DtoCreateGame } from "./dto/create_game.dto";
-import { DtoGameIdQuery } from "./dto/queries.dto";
+import { DtoIdParams } from "./dto/queries.dto";
 import { GamesService } from "./games.service";
 
 @UseGuards(AuthGuard(), RolesGuard)
@@ -42,9 +42,9 @@ export class GamesAdminController {
 	}
 	@Roles("admin")
 	@Get("get_game")
-	async getGameById(@Query() query: DtoGameIdQuery) {
+	async getGameById(@Query() query: DtoIdParams) {
 		try {
-			return await this.gamesService.adminGetGameById(query.game_id);
+			return await this.gamesService.adminGetGameById(query.id);
 		} catch (e) {
 			const errorMessage = String(e.message);
 			console.error(errorMessage);
