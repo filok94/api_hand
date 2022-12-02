@@ -22,7 +22,7 @@ export class AvatarService {
 		@InjectModel(UserAvatar.name)
 		private userAvatarModel: Model<UserAvatarDocument>,
 		private tokenService: TokenService
-	) {}
+	) { }
 
 	async getAllAvatars(): Promise<IAllAvatar[]> {
 		try {

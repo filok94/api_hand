@@ -3,7 +3,6 @@ import { Roles } from "../roles_guard/roles.decorator";
 import { RolesGuard } from "../roles_guard/roles_guard";
 import { ErrorMessages } from "../exceptions/exceptions";
 import { IHeader } from "../common/common_interfaces";
-import { DtoAvatarIdQuery } from "./dto/avatar-queries.dto";
 import { CreateAvatarDto } from "./dto/create_avatar_dto";
 import { AvatarService } from "./avatar.service";
 import {
@@ -15,19 +14,20 @@ import {
 	InternalServerErrorException,
 	Post,
 	Put,
-	Query,
 	UseGuards,
 	UnprocessableEntityException,
 	NotFoundException,
+	Param,
 } from "@nestjs/common";
 import { DtoSaveAvatar } from "./dto/save_avatar.dto";
+import { DtoIdParams } from "src/games/dto/queries.dto";
 
 @UseGuards(AuthGuard())
 @Controller("avatars")
 export class AvatarController {
-	constructor(private avatarService: AvatarService) {}
+	constructor(private avatarService: AvatarService) { }
 
-	@Get("get_all")
+	@Get()
 	async getAllAvatars() {
 		try {
 			return await this.avatarService.getAllAvatars();
@@ -61,7 +61,7 @@ export class AvatarController {
 		}
 	}
 
-	@Get("get_my")
+	@Get("user")
 	async getUsersAvatar(@Headers() header: IHeader) {
 		try {
 			const ref_link = await this.avatarService.getUserAvatarLink(header.token);
@@ -73,10 +73,10 @@ export class AvatarController {
 		}
 	}
 
-	@Get()
-	async getById(@Query() query: DtoAvatarIdQuery) {
+	@Get(":id")
+	async getById(@Param() params: DtoIdParams) {
 		try {
-			return await this.avatarService.getAvatarById(query.avatar_id);
+			return await this.avatarService.getAvatarById(params.id);
 		} catch (e) {
 			const errorMessage = String(e.message);
 			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_AVATAR)) {
