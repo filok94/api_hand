@@ -3,7 +3,9 @@ import { Document } from "mongoose";
 
 export type UserDocument = User & Document;
 
-@Schema({ versionKey: false })
+@Schema({
+	versionKey: false 
+})
 export class User {
 	@Prop({
 		required: true,
@@ -12,13 +14,17 @@ export class User {
 		minlength: 6,
 		maxlength: 20,
 	})
-	login: string;
+		login: string;
 
-	@Prop({ required: true, minlength: 8, maxlength: 255 })
-	password: string;
+	@Prop({
+		required: true, minlength: 8, maxlength: 255 
+	})
+		password: string;
 
-	@Prop({ type: Boolean, required: true, default: false })
-	is_admin: boolean;
+	@Prop({
+		type: Boolean, required: true, default: false 
+	})
+		is_admin: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

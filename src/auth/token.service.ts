@@ -1,3 +1,4 @@
+import { ITokensResponse } from "../auth/interfaces/responses";
 import { ErrorMessages } from "./../exceptions/exceptions";
 import { User, UserDocument } from "./schemas/user.schema";
 import { Token, TokenDocument } from "./schemas/token.schema";
@@ -9,22 +10,25 @@ import LoginDto from "./dto/login.dto";
 
 @Injectable()
 export class TokenService {
-	constructor(
+	constructor (
 		@InjectModel(Token.name) private tokenModel: Model<TokenDocument>,
 		private jwtService: JwtService,
 		@InjectModel(User.name) private userModel: Model<UserDocument>
 	) {}
 
-	async getTokenByUser(id: string): Promise<Token> {
+	async getTokenByUser (id: string): Promise<Token> {
 		try {
-			const token = await this.tokenModel.findOne({ user: id });
+			const token = await this.tokenModel.findOne({
+				user: id 
+			});
 			return token;
-		} catch (e) {
+		}
+		catch (e) {
 			throw new Error(e.message);
 		}
 	}
 
-	async getUserByToken(token: string): Promise<UserDocument> {
+	async getUserByToken (token: string): Promise<UserDocument> {
 		try {
 			const tokens = await this.tokenModel
 				.findOne({
@@ -35,29 +39,42 @@ export class TokenService {
 					model: this.userModel,
 				});
 			return tokens.user;
-		} catch (e) {
+		}
+		catch (e) {
 			throw new Error(e);
 		}
 	}
 
-	async createToken(payload: LoginDto): Promise<Token> {
+	async createToken (payload: LoginDto): Promise<Token> {
 		try {
 			const userId = await (
-				await this.userModel.findOne({ login: payload.login })
+				await this.userModel.findOne({
+					login: payload.login 
+				})
 			).id;
-			const accessToken = () => this.jwtService.sign({ userId });
+			const accessToken = () => this.jwtService.sign({
+				userId 
+			});
 			const refreshToken = () =>
 				this.jwtService.sign(
-					{ userId },
-					{ expiresIn: process.env.REFRESH_EXPIRATION }
+					{
+						userId 
+					},
+					{
+						expiresIn: process.env.REFRESH_EXPIRATION 
+					}
 				);
 			const access_token = accessToken();
 			const refresh_token = refreshToken();
 
-			const newTokens = { access_token, refresh_token };
+			const newTokens = {
+				access_token, refresh_token 
+			};
 			if (userId != null) {
 				const newInfo = await this.tokenModel.findOneAndUpdate(
-					{ user: userId },
+					{
+						user: userId 
+					},
 					{
 						user: userId,
 						...newTokens,
@@ -69,18 +86,21 @@ export class TokenService {
 				);
 				return newInfo;
 			}
-		} catch (e) {
+		}
+		catch (e) {
 			throw new Error(e.message);
 		}
 	}
 
-	async refreshTokens(token: string) {
+	async refreshTokens (token: string): Promise<ITokensResponse> {
 		try {
 			const tokenDocument = await this.tokenModel.aggregate<
 				TokenDocument & { userDocument: UserDocument }
 			>([
 				{
-					$match: { refresh_token: token },
+					$match: {
+						refresh_token: token 
+					},
 				},
 				{
 					$lookup: {
@@ -92,7 +112,9 @@ export class TokenService {
 				},
 				{
 					$set: {
-						userDocument: { $arrayElemAt: ["$userDocument", 0] },
+						userDocument: {
+							$arrayElemAt: ["$userDocument", 0] 
+						},
 					},
 				},
 				{
@@ -100,6 +122,7 @@ export class TokenService {
 						userDocument: true,
 						access_token: true,
 						refresh_token: true,
+						is_admin: true,
 						_id: false,
 					},
 				},
@@ -114,17 +137,25 @@ export class TokenService {
 			if (!refreshTokenNotExpired) {
 				throw new Error(ErrorMessages.TOKEN_EXPIRED);
 			}
-			return await this.createToken(tokenDocument[0].userDocument);
-		} catch (e) {
+			const tokens =  await this.createToken(tokenDocument[0].userDocument);
+			return {
+				access_token: tokens.access_token,
+				refresh_token: tokens.refresh_token,
+				user: tokens.user,
+				is_admin: tokenDocument[0].userDocument.is_admin
+			};
+		}
+		catch (e) {
 			throw new Error(e);
 		}
 	}
 
-	async getAllTokens() {
+	async getAllTokens () {
 		try {
 			const tokens = await this.tokenModel.find();
 			return tokens;
-		} catch (e) {
+		}
+		catch (e) {
 			throw new Error(e);
 		}
 	}

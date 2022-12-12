@@ -4,28 +4,27 @@ import { RolesGuard } from "./../roles_guard/roles_guard";
 import { Roles } from "./../roles_guard/roles.decorator";
 import { AuthGuard } from "@nestjs/passport";
 import { UserService } from "./user.service";
-import {
-	BadRequestException,
+import { BadRequestException,
 	Body,
 	Controller,
 	Get,
 	HttpCode,
 	InternalServerErrorException,
 	Post,
-	UseGuards,
-} from "@nestjs/common";
+	UseGuards } from "@nestjs/common";
 
 @UseGuards(AuthGuard(), RolesGuard)
 @Controller("users")
 export class UserController {
-	constructor(private userService: UserService) {}
+	constructor (private userService: UserService) {}
 
 	@Roles("admin")
 	@Get("/get_all")
-	async getAllUsers() {
+	async getAllUsers () {
 		try {
 			return await this.userService.getAllUsers();
-		} catch (e) {
+		}
+		catch (e) {
 			throw new InternalServerErrorException();
 		}
 	}
@@ -33,10 +32,11 @@ export class UserController {
 	@Roles("admin")
 	@Post("/set_admin")
 	@HttpCode(200)
-	async setUserAdmin(@Body() dto: SetUserAdminDto) {
+	async setUserAdmin (@Body() dto: SetUserAdminDto) {
 		try {
 			return await this.userService.setUserAdmin(dto);
-		} catch (e) {
+		}
+		catch (e) {
 			const errorMessage = String(e.message);
 			console.error(errorMessage);
 			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_LOGIN)) {

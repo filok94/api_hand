@@ -1,39 +1,41 @@
 import { TokenService } from "./token.service";
 import { ErrorMessages } from "../exceptions/exceptions";
 import loginDto from "./dto/login.dto";
-import {
-	Body,
+import { Body,
 	ConflictException,
 	Controller,
 	HttpCode,
 	InternalServerErrorException,
 	NotFoundException,
 	Post,
-	UnauthorizedException,
-} from "@nestjs/common";
+	UnauthorizedException } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import RefreshTokenDto from "./dto/refresh_token.dto";
 import LoginDto from "./dto/login.dto";
 
 @Controller("auth")
 export class AuthController {
-	constructor(
+	constructor (
 		private authService: AuthService,
 		private tokenService: TokenService
 	) {}
 
 	@Post("/sign_up")
 	@HttpCode(200)
-	async registrationUser(@Body() dto: LoginDto) {
+	async registrationUser (@Body() dto: LoginDto) {
 		try {
-			const { access_token, refresh_token, user } =
+			const { access_token, refresh_token, user, is_admin } =
 				await this.authService.signUp(dto);
-			return { access_token, refresh_token, user };
-		} catch (e) {
+			return {
+				access_token, refresh_token, user, is_admin
+			};
+		}
+		catch (e) {
 			const errorMessage = String(e.message);
 			if (errorMessage.includes(ErrorMessages.DUPLICATES_IN_COLLECTION)) {
 				throw new ConflictException();
-			} else {
+			}
+			else {
 				console.log(errorMessage);
 				throw new InternalServerErrorException();
 			}
@@ -42,18 +44,22 @@ export class AuthController {
 
 	@Post("/sign_in")
 	@HttpCode(200)
-	async login(@Body() dto: loginDto) {
+	async login (@Body() dto: loginDto) {
 		try {
-			const { user, access_token, refresh_token } =
+			const { user, access_token, refresh_token, is_admin } =
 				await this.authService.signIn(dto);
-			return { user, access_token, refresh_token };
-		} catch (e) {
+			return {
+				user, access_token, refresh_token, is_admin
+			};
+		}
+		catch (e) {
 			if (
 				e.message.includes("Cannot read properties") ||
 				e.message.includes("wrong password")
 			) {
 				throw new UnauthorizedException("invalid user or password");
-			} else {
+			}
+			else {
 				console.log(e.message);
 				throw new InternalServerErrorException();
 			}
@@ -62,19 +68,23 @@ export class AuthController {
 
 	@Post("refresh_tokens")
 	@HttpCode(200)
-	async refreshTokens(@Body() dto: RefreshTokenDto) {
+	async refreshTokens (@Body() dto: RefreshTokenDto) {
 		try {
-			const { access_token, refresh_token, user } =
+			const { access_token, refresh_token, user, is_admin } =
 				await this.tokenService.refreshTokens(dto.refresh_token);
-			return { access_token, refresh_token, user };
-		} catch (e) {
+			return {
+				access_token, refresh_token, user, is_admin
+			};
+		}
+		catch (e) {
 			const errorMessage = String(e.message);
 			if (errorMessage.includes(ErrorMessages.TOKEN_EXPIRED)) {
 				throw new UnauthorizedException(ErrorMessages.TOKEN_EXPIRED);
 			}
 			if (errorMessage.includes(ErrorMessages.CANNOT_FIND_TOKEN)) {
 				throw new NotFoundException(ErrorMessages.CANNOT_FIND_TOKEN);
-			} else {
+			}
+			else {
 				console.log(e.message);
 				throw new InternalServerErrorException();
 			}
