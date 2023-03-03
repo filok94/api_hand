@@ -1,88 +1,46 @@
 {
     "env": {
+        "browser": true,
         "es2021": true
     },
     "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+        "standard"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": "latest",
-        "sourceType": "module",
-        "project": [
-            "./tsconfig.json"
-        ]
+        "sourceType": "module"
     },
     "plugins": [
         "@typescript-eslint"
     ],
     "rules": {
-		"no-mixed-spaces-and-tabs": 0,
-		"indent": [
-			"error",
-			"tab"
-		],
-		"linebreak-style": [
-			"error",
-			"unix"
-		],
-		"quotes": [
-			"error",
-			"double"
-		],
-		"semi": [
-			"error",
-			"always"
-		],
-		"array-bracket-spacing": "warn",
-		"curly": "warn",
-		"object-curly-spacing": [
-			"warn",
-			"always"
-		],
-		"space-before-function-paren": "warn",
-		"arrow-spacing": "warn",
-		"object-curly-newline": [
-			"warn",
-			{
-				"ObjectExpression": "always",
-				"ObjectPattern": {
-					"multiline": true
-				},
-				"ImportDeclaration": "never",
-				"ExportDeclaration": {
-					"multiline": true,
-					"minProperties": 3
-				}
-			}
-		],
-		"template-curly-spacing": [
-			"warn",
-			"always"
-		],
-		"brace-style": [
-			"warn",
-			"stroustrup"
-		],
-		"no-multiple-empty-lines": [
-			"warn",
-			{
-				"max": 1,
-				"maxEOF": 0
-			}
-		],
-		"no-whitespace-before-property": [
-			"warn"
-		],
-		"eol-last": ["warn", "always"],
-
-		"comma-dangle": ["warn", {
-			"arrays": "only-multiline",
-			"objects": "only-multiline",
-			"imports": "never",
-			"exports": "never",
-			"functions": "never"
-	    }]
+        "object-curly-spacing": ["error", "always"],
+        "brace-style": ["error", "1tbs"],
+        "@typescript-eslint/consistent-type-definitions": "warn",
+        "no-tabs": ["error", { "allowIndentationTabs": true }],
+        "indent": ["error", 2,  {
+            "offsetTernaryExpressions": true,
+            "ObjectExpression": "first",
+            "MemberExpression": 2,
+            "VariableDeclarator": "first",
+            "FunctionExpression": {
+                "parameters": "first"
+            },
+            "FunctionDeclaration": {
+                "parameters": "first"
+            },
+            "CallExpression": {
+                "arguments": "first"
+            },
+            "ArrayExpression": "first",
+            "ImportDeclaration": "first"
+        }],
+        "max-len": ["error", { "code": 150, "tabWidth": 4 }],
+        "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+        "space-infix-ops": "error",
+        "comma-spacing": ["error", { "before": false, "after": true }],
+        "no-useless-constructor": 0,
+        "camelcase": "off"
     }
 }

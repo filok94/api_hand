@@ -1,73 +1,72 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { Document } from "mongoose";
-import { IReturnedCalculatedResult } from "../games.interface";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import mongoose, { Document } from 'mongoose'
+import { IReturnedCalculatedResult } from '../games.interface'
 
-export const maxAnswersCount = 4;
+export const maxAnswersCount = 4
 
 @Schema({
   _id: false,
-  versionKey: false,
+  versionKey: false
 })
 export class UserGamesTestData extends Document {
   @Prop({
     type: Number,
     required: true,
-    max: maxAnswersCount,
+    max: maxAnswersCount
   })
-  right_answer: number;
+    right_answer: number
 
   @Prop({
     type: Number,
     required: true,
-    max: maxAnswersCount,
+    max: maxAnswersCount
   })
-  user_answer: number;
+    user_answer: number
 
   @Prop({ type: Boolean, required: true })
-  is_right: boolean;
+    is_right: boolean
 
   @Prop({ type: Number, required: true })
-  index: number;
+    index: number
 }
 
 export type UserGametestDataDocument = UserGamesTestData & Document;
 export const UserGamesTestDataSchema =
-  SchemaFactory.createForClass(UserGamesTestData);
+  SchemaFactory.createForClass(UserGamesTestData)
 
 @Schema({
-  versionKey: false,
+  versionKey: false
 })
 export class UserGames extends Document {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: 'users'
   })
-  user?: mongoose.Schema.Types.ObjectId;
+    user?: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: Number,
-    required: true,
+    required: true
   })
-  right_asnwers_count: number;
+    right_asnwers_count: number
 
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: "games",
+    ref: 'games'
   })
-  game: mongoose.Schema.Types.ObjectId;
+    game: mongoose.Schema.Types.ObjectId
 
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: "persons",
+    ref: 'persons'
   })
-  person: mongoose.Schema.Types.ObjectId;
+    person: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: [UserGamesTestDataSchema], required: true })
-  test_data: IReturnedCalculatedResult[];
+    test_data: IReturnedCalculatedResult[]
 }
 export type UserGamesDocument = UserGames & Document;
-export const UserGamesSchema = SchemaFactory.createForClass(UserGames);
+export const UserGamesSchema = SchemaFactory.createForClass(UserGames)

@@ -1,86 +1,84 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { Document } from "mongoose";
-
-export type AvatarDocument = Avatar & Document;
-export type AvatarPropsDocument = AvatarProps & Document;
-export type UserAvatarDocument = UserAvatar & Document;
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import mongoose, { Document } from 'mongoose'
 
 @Schema({
-	versionKey: false,
-	_id: false,
-	autoCreate: false,
-	id: false,
+  versionKey: false,
+  _id: false,
+  autoCreate: false,
+  id: false
 })
 export class AvatarProps {
 	@Prop({
-		type: String,
-		required: true,
+	  type: String,
+	  required: true
 	})
-	prop_name: string;
+	  prop_name: string
 
 	@Prop({
-		type: [String],
-		required: true,
+	  type: [String],
+	  required: true
 	})
-	values: string[];
+	  values: string[]
 
 	@Prop({
-		type: String,
+	  type: String
 	})
-	probability: string | null;
+	  probability: string | null
 }
-export const AvatarPropsSchema = SchemaFactory.createForClass(AvatarProps);
+export const AvatarPropsSchema = SchemaFactory.createForClass(AvatarProps)
 
 @Schema({
-	versionKey: false,
+  versionKey: false
 })
 export class Avatar {
 	@Prop({
-		type: String,
-		maxLength: 100,
-		required: true,
-		unique: true,
+	  type: String,
+	  maxLength: 100,
+	  required: true,
+	  unique: true
 	})
-	ref_name: string;
+	  ref_name: string
 
 	@Prop({
-		type: String,
-		maxLength: 255,
-		required: true,
-		unique: true,
+	  type: String,
+	  maxLength: 255,
+	  required: true,
+	  unique: true
 	})
-	base_link: string;
+	  base_link: string
 
 	@Prop({
-		type: [AvatarPropsSchema],
-		required: true,
+	  type: [AvatarPropsSchema],
+	  required: true
 	})
-	props: AvatarProps[];
+	  props: AvatarProps[]
 }
-export const AvatarSchema = SchemaFactory.createForClass(Avatar);
+export const AvatarSchema = SchemaFactory.createForClass(Avatar)
 
 @Schema({ versionKey: false, _id: false, id: false })
 export class UserAvatar {
 	@Prop({
-		type: String,
-		required: true,
+	  type: String,
+	  required: true
 	})
-	full_link: string;
+	  full_link: string
 
 	@Prop({
-		required: true,
-		type: mongoose.Schema.Types.ObjectId,
-		unique: true,
-		ref: "users",
+	  required: true,
+	  type: mongoose.Schema.Types.ObjectId,
+	  unique: true,
+	  ref: 'users'
 	})
-	user: mongoose.Schema.Types.ObjectId;
+	  user: mongoose.Schema.Types.ObjectId
 
 	@Prop({
-		required: true,
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "avatars",
+	  required: true,
+	  type: mongoose.Schema.Types.ObjectId,
+	  ref: 'avatars'
 	})
-	avatar: mongoose.Schema.Types.ObjectId;
+	  avatar: mongoose.Schema.Types.ObjectId
 }
-export const UserAvatarSchema = SchemaFactory.createForClass(UserAvatar);
+export const UserAvatarSchema = SchemaFactory.createForClass(UserAvatar)
+export type AvatarDocument = Avatar & Document;
+export type AvatarPropsDocument = AvatarProps & Document;
+export type UserAvatarDocument = UserAvatar & Document;

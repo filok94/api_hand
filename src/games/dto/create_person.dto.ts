@@ -1,18 +1,18 @@
-import { IsString, IsNotEmpty, IsNumber } from "class-validator";
+import { IsString, IsNotEmpty, IsNumber } from 'class-validator'
 export class DtoCreatePerson {
   @IsNotEmpty()
   @IsString()
-  readonly name: string;
+  readonly name: string
 
   @IsNotEmpty()
   @IsString()
-  readonly description: string;
+  readonly description: string
 
   @IsNotEmpty()
   @IsString()
-  readonly link: string;
+  readonly link: string
 
   @IsNotEmpty()
   @IsNumber()
-  readonly count: number;
+  readonly count: number
 }

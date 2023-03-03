@@ -1,83 +1,82 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { Document } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import mongoose, { Document } from 'mongoose'
 
-export type GameDocument = Game & Document;
-export const maxAnswersCount = 4;
+export const maxAnswersCount = 4
 
 @Schema({
-	versionKey: false,
-	_id: false,
-	autoCreate: false,
+  versionKey: false,
+  _id: false,
+  autoCreate: false
 })
 export class TestData {
 	@Prop({
-		required: true,
-		type: Number,
-		max: 10,
+	  required: true,
+	  type: Number,
+	  max: 10
 	})
-	index: number;
+	  index: number
 
 	@Prop({
-		required: true,
-		maxlength: 300,
-		type: String,
+	  required: true,
+	  maxlength: 300,
+	  type: String
 	})
-	question: string;
+	  question: string
 
 	@Prop({
-		required: true,
-		type: [String],
-		maxlength: maxAnswersCount,
+	  required: true,
+	  type: [String],
+	  maxlength: maxAnswersCount
 	})
-	answers: string[];
+	  answers: string[]
 
 	@Prop({
-		required: true,
-		type: Number,
-		max: maxAnswersCount - 1,
+	  required: true,
+	  type: Number,
+	  max: maxAnswersCount - 1
 	})
-	right_answer: number;
+	  right_answer: number
 }
 
-export const TestDataSchema = SchemaFactory.createForClass(TestData);
+export const TestDataSchema = SchemaFactory.createForClass(TestData)
 
 @Schema({
-	versionKey: false,
+  versionKey: false
 })
 export class Game {
 	@Prop({
-		required: true,
-		maxlength: 50,
-		type: String,
+	  required: true,
+	  maxlength: 50,
+	  type: String
 	})
-	title: string;
+	  title: string
 
 	@Prop({
-		required: true,
-		maxlength: 255,
-		type: String,
+	  required: true,
+	  maxlength: 255,
+	  type: String
 	})
-	description: string;
+	  description: string
 
 	@Prop({
-		required: true,
-		type: String,
+	  required: true,
+	  type: String
 	})
-	link: string;
+	  link: string
 
 	@Prop({
-		required: true,
-		type: [mongoose.Schema.Types.ObjectId],
-		ref: "persons",
+	  required: true,
+	  type: [mongoose.Schema.Types.ObjectId],
+	  ref: 'persons'
 	})
-	persons: mongoose.Schema.Types.ObjectId[];
+	  persons: mongoose.Schema.Types.ObjectId[]
 
 	@Prop({
-		required: true,
-		type: [TestDataSchema],
+	  required: true,
+	  type: [TestDataSchema]
 	})
-	test_data: TestData[];
+	  test_data: TestData[]
 }
 
-export const GameSchema = SchemaFactory.createForClass(Game);
+export const GameSchema = SchemaFactory.createForClass(Game)
+export type GameDocument = Game & Document;

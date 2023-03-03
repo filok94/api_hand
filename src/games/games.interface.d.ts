@@ -1,6 +1,7 @@
-import { PersonDocument } from "./schemas/person.schema";
-import mongoose from "mongoose";
-import { Person } from "./schemas/game.schema";
+import { PersonDocument } from './schemas/person.schema'
+import mongoose from 'mongoose'
+import { Person } from './schemas/game.schema'
+import { UserGametestDataDocument } from './schemas/user_games.schema'
 export interface IReturnedOneQuestion {
 	question: string;
 	answers: string[];
