@@ -130,7 +130,7 @@ export class TokenService {
         throw new Error(ErrorMessages.CANNOT_FIND_TOKEN)
       }
       const refreshTokenNotExpired =
-				new Date(decodedRefreshToken.exp * 1000) >= new Date(Date.now())
+				new Date(Object(decodedRefreshToken).ext * 1000) >= new Date(Date.now())
       if (!refreshTokenNotExpired) {
         throw new Error(ErrorMessages.TOKEN_EXPIRED)
       }
