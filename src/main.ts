@@ -6,7 +6,7 @@ import { useContainer } from 'class-validator'
 
 const start = async () => {
   try {
-    const PORT = process.env.PORT
+    const PORT = process.env.PORT ?? 4040
     const app = await NestFactory.create(AppModule, {
       cors: true
     })
