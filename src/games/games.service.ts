@@ -85,8 +85,12 @@ export class GamesService {
   ): Promise<IReturnedOneQuestion[]> {
     try {
       const gameData = await this.gameModel.findOne({
-        game: param.id
+        _id: param.id
       })
+
+      // validation
+      if (!gameData) throw new Error(ErrorMessages.CANNOT_FIND_GAME)
+
       const returnedArray: IReturnedOneQuestion[] = gameData.test_data.map(
         (e) => {
           return {

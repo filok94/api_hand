@@ -41,6 +41,9 @@ export class GamesController {
 	    return await this.gamesService.getQuestionsForGame(params)
 	  } catch (e) {
 	    const errorMessage = String(e.message)
+	    if (errorMessage.includes(ErrorMessages.CANNOT_FIND_GAME)) {
+	      throw new NotFoundException(errorMessage)
+	    }
 	    console.log(errorMessage)
 	    throw new InternalServerErrorException()
 	  }

@@ -11,6 +11,7 @@ export class ErrorMessages {
   static WRONG_QUESTION_DATA = 'wrong questions data'
   static WRONG_GAME_ID = 'wrong game id'
   static CANNOT_FIND_RESULTS = 'user have no results on this game'
+  static CANNOT_FIND_GAME = 'Cannot find game with this id'
 }
 
 export class ExcepitonsStrings {
