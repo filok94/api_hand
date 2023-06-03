@@ -80,6 +80,19 @@ export class GamesService {
     }
   }
 
+  async adminDeleteGame (gameId: mongoose.Schema.Types.ObjectId): Promise<string> {
+    try {
+      const gameToDelete = await this.gameModel.findOneAndDelete({ _id: gameId })
+
+      if (!gameToDelete) {
+        throw new Error(ErrorMessages.CANNOT_FIND_GAME)
+      }
+      return gameToDelete.title
+    } catch (e) {
+      throw new Error(e)
+    }
+  }
+
   async getQuestionsForGame (
     param: DtoIdParams
   ): Promise<IReturnedOneQuestion[]> {
@@ -277,6 +290,35 @@ export class GamesService {
       return {
         ...gameData[0]
       }
+    } catch (e) {
+      throw new Error(e)
+    }
+  }
+
+  async createFakeGame (title: string): Promise<mongoose.Schema.Types.ObjectId> {
+    try {
+      const persons: mongoose.Schema.Types.ObjectId[] = (await this.personModel.find({}, { _id: 1 })).slice(0, 8).map(e => e._id)
+      const test_data = Array.from(Array(8).keys()).map(i => {
+        return {
+          question: `question-${i + 1}`,
+          answers: [`q-${i} answer-1`,
+                    `q-${i} answer-2`,
+                    `q-${i} answer-3`,
+                    `q-${i} answer-4`],
+          right_answer: Math.floor(Math.random() * (3 - 0 + 1) + 0),
+          index: i
+        }
+      })
+
+      const game: DtoCreateGame = {
+        title,
+        description: `${title}-description`,
+        link: `https://${title}-link`,
+        test_data,
+        persons
+      }
+
+      return await this.adminCreateGame(game)
     } catch (e) {
       throw new Error(e)
     }
