@@ -4,17 +4,21 @@
     push:
       branches: [ master ]
   jobs:
-    lint:
+    eslint:
+      name: github-runner / eslint
       runs-on: ubuntu-latest
-
+      permissions:
+        contents: read
+        pull-requests: write 
       steps:
-        - uses: actions/checkout@v3
-        - uses: stefanoeb/eslint-action@1.0.2
-          with:
-            files: /src
+        - uses: actions/checkout@v2
+        - name: Install modules
+          run: npm ci
+        - name: Run ESLint
+          run: npm run lint
     docker:
       runs-on: ubuntu-latest
-      needs: lint
+      needs: eslint
       steps:
         - uses: actions/checkout@v3
           name: Check out code
