@@ -1,7 +1,7 @@
 import { ITokensResponse } from '../auth/interfaces/responses'
 import { ErrorMessages } from './../exceptions/exceptions'
 import { User, UserDocument } from './schemas/user.schema'
-import { Token, TokenDocument } from './schemas/token.schema'
+import { Token } from './schemas/token.schema'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -11,17 +11,14 @@ import LoginDto from './dto/login.dto'
 @Injectable()
 export class TokenService {
   constructor (
-		@InjectModel(Token.name) private tokenModel: Model<TokenDocument>,
 		private jwtService: JwtService,
 		@InjectModel(User.name) private userModel: Model<UserDocument>
   ) {}
 
   async getTokenByUser (id: string): Promise<Token> {
     try {
-      const token = await this.tokenModel.findOne({
-        user: id
-      })
-      return token
+      const { tokens } = await this.userModel.findById(id)
+      return tokens.at(-1)
     } catch (e) {
       throw new Error(e.message)
     }
@@ -29,128 +26,67 @@ export class TokenService {
 
   async getUserByToken (token: string): Promise<UserDocument> {
     try {
-      const tokens = await this.tokenModel
-          .findOne({
-            access_token: token
-          })
-          .populate<{ user: UserDocument }>({
-            path: 'user',
-            model: this.userModel
-          })
-      return tokens.user
+      return await this.userModel.findOne({ 'tokens.access_token': token })
     } catch (e) {
       throw new Error(e)
     }
   }
 
-  async createToken (payload: LoginDto): Promise<Token> {
+  async createTokens (payload: LoginDto): Promise<Token> {
     try {
-      const userId = await (
-        await this.userModel.findOne({
-          login: payload.login
-        })
-      ).id
-      const accessToken = () => this.jwtService.sign({
-        userId
-      })
+      const { login } = payload
+      const accessToken = () => this.jwtService.sign({ login })
       const refreshToken = () =>
-        this.jwtService.sign(
-          {
-            userId
-          },
-          {
-            expiresIn: process.env.REFRESH_EXPIRATION
-          }
-        )
+        this.jwtService.sign({ login },
+                             { expiresIn: process.env.REFRESH_EXPIRATION })
       const access_token = accessToken()
       const refresh_token = refreshToken()
 
-      const newTokens = {
-        access_token, refresh_token
-      }
-      if (userId != null) {
-        const newInfo = await this.tokenModel.findOneAndUpdate(
-          {
-            user: userId
-          },
-          {
-            user: userId,
-            ...newTokens
-          },
-          {
-            upsert: true,
-            new: true
-          }
-        )
-        return newInfo
-      }
+      const newTokens = { access_token, refresh_token }
+      const { tokens } = await this.userModel.findOneAndUpdate({ login },
+                                                               {
+                                                                 $push: {
+                                                                   tokens: {
+                                                                     $each: [{ ...newTokens }],
+                                                                     $slice: -5
+                                                                   }
+                                                                 }
+                                                               },
+                                                               { new: true })
+      return tokens.at(-1)
     } catch (e) {
-      throw new Error(e.message)
+      throw new Error(e)
     }
   }
 
   async refreshTokens (token: string): Promise<ITokensResponse> {
     try {
-      const tokenDocument = await this.tokenModel.aggregate<
-				TokenDocument & { userDocument: UserDocument }
-			>([
-			  {
-			    $match: {
-			      refresh_token: token
-			    }
-			  },
-			  {
-			    $lookup: {
-			      from: 'users',
-			      foreignField: '_id',
-			      localField: 'user',
-			      as: 'userDocument'
-			    }
-			  },
-			  {
-			    $set: {
-			      userDocument: {
-			        $arrayElemAt: ['$userDocument', 0]
-			      }
-			    }
-			  },
-			  {
-			    $project: {
-			      userDocument: true,
-			      access_token: true,
-			      refresh_token: true,
-			      is_admin: true,
-			      _id: false
-			    }
-			  }
-			])
+      const { id, is_admin, login, password } = await this.userModel.findOne({ 'tokens.refresh_token': token })
       const decodedRefreshToken = this.jwtService.decode(String(token))
       // validation
-      if (!tokenDocument.length) {
+      if (!id) {
         throw new Error(ErrorMessages.CANNOT_FIND_TOKEN)
       }
-      const refreshTokenNotExpired =
-				new Date(Object(decodedRefreshToken).ext * 1000) >= new Date(Date.now())
+      const refreshTokenNotExpired = new Date(Object(decodedRefreshToken).exp * 1000) >= new Date(Date.now())
       if (!refreshTokenNotExpired) {
         throw new Error(ErrorMessages.TOKEN_EXPIRED)
       }
-      const tokens = await this.createToken(tokenDocument[0].userDocument)
+      await this.userModel.findOneAndUpdate({ login }, {
+        $pull: {
+          tokens: { refresh_token: token }
+        }
+      })
+      const { access_token, refresh_token } = await this.createTokens({ login, password })
       return {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        user: tokens.user,
-        is_admin: tokenDocument[0].userDocument.is_admin
+        access_token,
+        refresh_token,
+        user: id,
+        is_admin
       }
     } catch (e) {
-      throw new Error(e)
-    }
-  }
-
-  async getAllTokens () {
-    try {
-      const tokens = await this.tokenModel.find()
-      return tokens
-    } catch (e) {
+      if (String(e).includes('Cannot destructure property')) {
+        throw new Error(ErrorMessages.CANNOT_FIND_TOKEN)
+      }
       throw new Error(e)
     }
   }
