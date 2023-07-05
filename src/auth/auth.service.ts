@@ -17,20 +17,20 @@ export class AuthService {
   async signUp (dto: LoginDto): Promise<ITokensResponse> {
     try {
       const hashPassword = await bcrypt.hash(dto.password, 12)
-      const user = await this.userModel.create({
+      const { is_admin, _id } = await this.userModel.create({
         password: hashPassword,
         login: dto.login,
         is_admin: false
       })
 
-      const tokens = await this.tokenService.createToken({
+      const { access_token, refresh_token } = await this.tokenService.createTokens({
         ...dto
       })
       return {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        user: tokens.user,
-        is_admin: user.is_admin
+        access_token,
+        refresh_token,
+        user: _id,
+        is_admin
       }
     } catch (e) {
       throw new Error(e)
@@ -39,28 +39,29 @@ export class AuthService {
 
   async signIn (dto: LoginDto): Promise<ITokensResponse> {
     try {
-      const user = await this.userModel.findOne({
-        login: dto.login
-      })
-      const isPasswordCorrect = await bcrypt.compare(
-        dto.password,
-        user.password
-      )
+      const { login, password: dtoPassword } = dto
+      const { _id, password, is_admin } = await this.userModel.findOne({ login })
+      const isPasswordCorrect = await bcrypt.compare(dtoPassword,
+                                                     password)
 
-      if (user && isPasswordCorrect) {
-        const tokens = await this.tokenService.createToken({
+      if (_id && isPasswordCorrect) {
+        const { access_token, refresh_token } = await this.tokenService.createTokens({
           ...dto
         })
+
         return {
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
-          user: tokens.user,
-          is_admin: user.is_admin
+          access_token,
+          refresh_token,
+          is_admin,
+          user: _id
         }
       } else {
         throw new Error('wrong password')
       }
     } catch (e) {
+      if (String(e).includes("Cannot destructure property '_id'")) {
+        throw new Error('wrong password')
+      }
       throw new Error(e)
     }
   }

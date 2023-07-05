@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
+import { Token } from './token.schema'
 
 @Schema({
   versionKey: false
@@ -23,6 +24,11 @@ export class User {
 	  type: Boolean, required: true, default: false
 	})
 	  is_admin: boolean
+
+	@Prop({
+	  type: Array, required: false
+	})
+	  tokens: Token[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

@@ -45,11 +45,7 @@ export class AuthController {
 	@HttpCode(200)
 	async login (@Body() dto: LoginDto) {
 	  try {
-	    const { user, access_token, refresh_token, is_admin } =
-				await this.authService.signIn(dto)
-	    return {
-	      user, access_token, refresh_token, is_admin
-	    }
+	    return await this.authService.signIn(dto)
 	  } catch (e) {
 	    if (
 	      e.message.includes('Cannot read properties') ||
@@ -67,11 +63,7 @@ export class AuthController {
 	@HttpCode(200)
 	async refreshTokens (@Body() dto: RefreshTokenDto) {
 	  try {
-	    const { access_token, refresh_token, user, is_admin } =
-				await this.tokenService.refreshTokens(dto.refresh_token)
-	    return {
-	      access_token, refresh_token, user, is_admin
-	    }
+	    return await this.tokenService.refreshTokens(dto.refresh_token)
 	  } catch (e) {
 	    const errorMessage = String(e.message)
 	    if (errorMessage.includes(ErrorMessages.TOKEN_EXPIRED)) {
